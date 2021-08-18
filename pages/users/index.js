@@ -1,8 +1,8 @@
-import Layout from "../Layoyts/Layout";
+import React from 'react'
 export default function ListUser() {
   return (
     <>
-      <Layout>
+      {/* <Layout>
         <h1 className="h3 mb-2 text-gray-800">Tables</h1>
         <div className="card shadow mb-4">
           <div className="card-header py-3">
@@ -356,7 +356,7 @@ export default function ListUser() {
             </div>
           </div>
         </div>
-      </Layout>
+      </Layout> */}
     </>
   );
 }
