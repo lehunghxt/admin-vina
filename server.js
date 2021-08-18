@@ -33,6 +33,7 @@ app.prepare().then(() => {
       req.session.save(err => {
         console.log(err)
       });
+      
       return handle(req, res);
     });
   });
