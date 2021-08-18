@@ -3,14 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node server.js",
+    "dev": "nodemon server.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "axios": "^0.21.1",
+    "crypto-js": "^4.1.1",
     "express": "^4.17.1",
+    "express-session": "^1.17.2",
+    "mssql": "^7.2.0",
     "next": "^11.1.0",
+    "nodemon": "^2.0.12",
     "react": "17.0.2",
     "react-dom": "17.0.2"
   },
