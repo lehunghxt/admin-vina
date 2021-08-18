@@ -2,7 +2,7 @@ const express = require("express");
 const next = require("next");
 const port = parseInt(process.env.PORT, 10) || 3000;
 const dev = process.env.NODE_ENV !== "production";
-const app = next({ dev });
+const app = next({});
 const handle = app.getRequestHandler();
 const bodyParser = require("body-parser");
 const session = require("express-session");
@@ -21,24 +21,35 @@ app.prepare().then(() => {
   server.use(bodyParser.json());
 
   server.get('/', (req, res) => {
-    console.log(req.session);
+    if(!req.session.User){
+      return app.render(req, res, '/auth/login', req.query)
+    }
     return app.render(req, res, '/index', req.query)
   })
 
+  server.get('/auth/login', (req, res) => {
+    if(req.session.User){
+      return app.render(req, res, '/index', req.query)
+    }
+    return app.render(req, res, '/auth/login', req.query)
+  })
+  
+
   server.post("/auth/login", (req, res) => {
     const { username, password } = req.body;
-    return UserController.CheckLogin(username, password).then((data) => {
-      req.session.username = username;
-      req.session.loggedin = true;
+    UserController.CheckLogin(username, password).then((data) => {
+      req.session.User = data;
       req.session.save(err => {
         console.log(err)
       });
-      
       return handle(req, res);
     });
   });
   server.all("*", (req, res) => {
-      return handle(req, res);
+    if(!req.session.User){
+      return app.render(req, res, '/auth/login', req.query)
+    }
+    return handle(req, res);
   });
   server.listen(port, (err) => {
     if (err) throw err;
