@@ -1,4 +1,10 @@
 import React from 'react'
+export const getServerSideProps = function ({ req, res }) {
+  console.log('Page User Render');
+  return {
+    props: {},
+  }
+}
 export default function ListUser() {
   return (
     <>

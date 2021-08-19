@@ -30,6 +30,7 @@ export default function FormLogin() {
             name="username"
             aria-describedby="emailHelp"
             placeholder="Username"
+            value="hungadmin"
           />
         </div>
         <div className="form-group">
@@ -39,6 +40,7 @@ export default function FormLogin() {
             id="password"
             name="password"
             placeholder="Password"
+            value="123456"
           />
         </div>
         <div className="form-group">

@@ -20,19 +20,19 @@ app.prepare().then(() => {
   server.use(bodyParser.urlencoded({ extended: true }));
   server.use(bodyParser.json());
 
-  server.get('/', (req, res) => {
-    if(!req.session.User){
-      return app.render(req, res, '/auth/login', req.query)
-    }
-    return app.render(req, res, '/index', req.query)
-  })
+  // server.get('/', (req, res) => {
+  //   if(!req.session.User){
+  //     return app.render(req, res, '/auth/login', req.query)
+  //   }
+  //   return app.render(req, res, '/index', req.query)
+  // })
 
-  server.get('/auth/login', (req, res) => {
-    if(req.session.User){
-      return app.render(req, res, '/index', req.query)
-    }
-    return app.render(req, res, '/auth/login', req.query)
-  })
+  // server.get('/auth/login', (req, res) => {
+  //   if(req.session.User){
+  //     return app.render(req, res, '/index', req.query)
+  //   }
+  //   return app.render(req, res, '/auth/login', req.query)
+  // })
   
 
   server.post("/auth/login", (req, res) => {
@@ -46,7 +46,8 @@ app.prepare().then(() => {
     });
   });
   server.all("*", (req, res) => {
-    if(!req.session.User){
+    console.log(req.session.User);
+    if(req.session.User == undefined){
       return app.render(req, res, '/auth/login', req.query)
     }
     return handle(req, res);

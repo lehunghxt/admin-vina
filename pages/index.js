@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Link from "next/dist/client/link";
-export default function Home() {
+
+ function Home() {
   return (
     <div>
       <Head>
@@ -114,3 +115,11 @@ export default function Home() {
     </div>
   );
 }
+
+export const getServerSideProps = function ({ req, res }) {
+  console.log('Page Index Render');
+  return {
+    props: {},
+  }
+}
+export default Home;
