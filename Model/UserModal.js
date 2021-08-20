@@ -1,19 +1,19 @@
 const sql = require("mssql");
 const CryptoJS = require("crypto-js");
 const config = {
-  encrypt: false,
-  user: "sa",
-  password: "SqlAsap@123",
-  server: "10.0.0.51",
-  database: "EISV2",
+    encrypt: false,
+    user: "sa",
+    password: "SqlAsap@123",
+    server: "10.0.0.51",
+    database: "EISV2",
 };
 
-module.exports.LoginUser =  function(username, password){
+module.exports.LoginUser = function (username, password) {
     var passHash = CryptoJS.MD5(username + password).toString();
     return new Promise((resolve, reject) => {
         sql.connect(config).then(function () {
             var request = new sql.Request();
-            request.query(`select * from tblUser where UserName = '${username}' and password = '${passHash}'`,  function (err, recordset) {
+            request.query(`select * from tblUser where UserName = '${username}' and password = '${passHash}'`, function (err, recordset) {
                 if (err) {
                     return reject(err);
                 }
@@ -22,16 +22,37 @@ module.exports.LoginUser =  function(username, password){
         });
     })
 }
-module.exports.GetIdLockUser = function(taxcode){
+
+module.exports.GetIdLockUser = function (taxcode) {
     return new Promise((resolve, reject) => {
-        sql.connect(config).then(function(){
-            var request = new sql.Request();
-            request.query(`SELECT Id from tblUser WHERE CustomerId = (SELECT Id from tblCustomer where taxcode = '${taxcode}')`, function(err, data){
-                if(err){
-                    reject(err);
-                }
+        var data = UserModal.GetIdLockUser(taxcode)
+            .then((data) => {
                 resolve(data);
+            })
+            .catch((err) => {
+                reject({});
             });
-        })
     });
+};
+
+module.exports.GetUserRolesById = async function (Id) {
+    await sql.connect(config);
+    var request = new sql.Request();
+    const query =
+        `SELECT CONCAT(T1.Roles,'',T2.Roles) as data  FROM
+    (
+        (SELECT Id,Roles FROM tblUser) as T1
+        FULL OUTER JOIN
+        (SELECT Roles, RoleGroupUser.UserId FROM  RoleGroup INNER JOIN RoleGroupUser ON RoleGroupUser.GroupID = RoleGroup.Id) as T2
+        on T1.Id = T2.UserId
+    )
+	WHERE T1.Id = ${Id}`
+    var rolesData = (await request.query(query)).recordset[0].data;
+    var roles = rolesData.split(',').filter(e => e != "" && e != undefined);
+    roles = Array.from(new Set(roles));
+    console.log(roles.join("','"))
+    const query2 = `SELECT RoleId FROM Role WHERE RoleId IN('${roles.join("','")}')`
+    var data = (await request.query(query2)).recordset;
+    var result = data.map(e => e.RoleId);
+    return result;
 }

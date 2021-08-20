@@ -23,3 +23,7 @@ module.exports.GetIdLockUser = function (taxcode) {
       });
   });
 };
+
+module.exports.GetUserRoleById = async (id) => {
+  return UserModal.GetUserRolesById(id);
+}

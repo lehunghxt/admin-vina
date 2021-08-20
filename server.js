@@ -7,7 +7,6 @@ const port = parseInt(process.env.PORT, 10) || 3000;
 const dev = process.env.NODE_ENV !== "production";
 const nextApp = next({});
 const handle = nextApp.getRequestHandler();
-const bodyParser = require("body-parser");
 const session = require("express-session");
 const redirectLoop = require("express-redirect-loop");
 const UserController = require("./Controller/UserController");
@@ -26,8 +25,8 @@ app.use(
     maxRedirects: 5,
   })
 );
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(app.urlencoded({ extended: true }));
+app.use(app.json());
 // =============================LISTENING SOCKET.IO===============================
 io.on("connection", (socket) => {
   console.log("We have a new connection!!!");
@@ -88,11 +87,14 @@ nextApp.prepare().then(() => {
   app.post("/auth/login", (req, res) => {
     const { username, password } = req.body;
     UserController.CheckLogin(username, password).then((data) => {
-      req.session.User = data;
-      req.session.save((err) => {
-        console.log(err);
-      });
-      return handle(req, res);
+      UserController.getUserRoleById(data.Id).then(roles => {
+        data.roles = roles;
+        req.session.User = data;
+        req.session.save((err) => {
+          console.log(err);
+        });
+        return handle(req, res);
+      })
     });
   });
   app.all("*", (req, res) => {
