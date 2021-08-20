@@ -1,4 +1,5 @@
-const app = require("express")();
+const express = require("express");
+const app = express();
 const server = require("http").Server(app);
 const io = require("socket.io")(server);
 
@@ -25,8 +26,8 @@ app.use(
     maxRedirects: 5,
   })
 );
-app.use(app.urlencoded({ extended: true }));
-app.use(app.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 // =============================LISTENING SOCKET.IO===============================
 io.on("connection", (socket) => {
   console.log("We have a new connection!!!");
@@ -87,7 +88,8 @@ nextApp.prepare().then(() => {
   app.post("/auth/login", (req, res) => {
     const { username, password } = req.body;
     UserController.CheckLogin(username, password).then((data) => {
-      UserController.getUserRoleById(data.Id).then(roles => {
+      console.log(data)
+      UserController.GetUserRoleById(data.Id).then(roles => {
         data.roles = roles;
         req.session.User = data;
         req.session.save((err) => {
