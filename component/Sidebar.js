@@ -35,6 +35,14 @@ export default function Sidebar() {
             </i>
           </Link>
         </li>
+        <li className="nav-item">
+          <Link href="/lockuser" passHref={true}>
+            <i className="nav-link">
+              <i className="fas fa-fw fa-tachometer-alt"></i>
+              <span>Lock User</span>
+            </i>
+          </Link>
+        </li>
         <hr className="sidebar-divider" />
       </ul>
     </>

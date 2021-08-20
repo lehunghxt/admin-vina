@@ -22,3 +22,16 @@ module.exports.LoginUser =  function(username, password){
         });
     })
 }
+module.exports.GetIdLockUser = function(taxcode){
+    return new Promise((resolve, reject) => {
+        sql.connect(config).then(function(){
+            var request = new sql.Request();
+            request.query(`SELECT Id from tblUser WHERE CustomerId = (SELECT Id from tblCustomer where taxcode = '${taxcode}')`, function(err, data){
+                if(err){
+                    reject(err);
+                }
+                resolve(data);
+            });
+        })
+    });
+}
