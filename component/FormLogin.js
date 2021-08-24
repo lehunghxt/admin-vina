@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
 export default function FormLogin() {
-    const router = useRouter();
-    const hanleSubmit = (event) => {
+  const [user, setUser] = useState({ username: '', password: '' });
+  const router = useRouter();
+  const hanleSubmit = (event) => {
     event.preventDefault();
     axios
       .post("/auth/login", {
@@ -11,14 +12,24 @@ export default function FormLogin() {
         password: event.target.password.value,
       })
       .then(function (response) {
-        if (response) {
+        if (response && typeof response.data === 'object') {
           router.push("/");
+        }
+        else {
+          console.log(response.data)
+          //alert(response.data)
         }
       })
       .catch(function (error) {
         console.log(error);
       });
   };
+  const handleInputChange = (e) => {
+    setUser({
+      ...user,
+      [e.currentTarget.name]: e.currentTarget.value,
+    })
+  }
   return (
     <>
       <form className="user" onSubmit={hanleSubmit}>
@@ -30,7 +41,8 @@ export default function FormLogin() {
             name="username"
             aria-describedby="emailHelp"
             placeholder="Username"
-            value="hungadmin"
+            value={user.username}
+            onInput={(e) => handleInputChange(e)}
           />
         </div>
         <div className="form-group">
@@ -40,7 +52,8 @@ export default function FormLogin() {
             id="password"
             name="password"
             placeholder="Password"
-            value="123456"
+            onInput={(e) => handleInputChange(e)}
+            value={user.password}
           />
         </div>
         <div className="form-group">

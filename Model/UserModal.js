@@ -1,5 +1,7 @@
 const sql = require("mssql");
-const CryptoJS = require("crypto-js");
+const { sequelize } = require('./DAL/index');
+const models = sequelize.Init();
+const { UserModel } = models;
 const config = {
     encrypt: false,
     user: "sa",
@@ -8,18 +10,22 @@ const config = {
     database: "EISV2",
 };
 
-module.exports.LoginUser = function (username, password) {
-    var passHash = CryptoJS.MD5(username + password).toString();
-    return new Promise((resolve, reject) => {
-        sql.connect(config).then(function () {
-            var request = new sql.Request();
-            request.query(`select * from tblUser where UserName = '${username}' and password = '${passHash}'`, function (err, recordset) {
-                if (err) {
-                    return reject(err);
-                }
-                resolve(recordset.recordset);
-            });
-        });
+module.exports.LoginUser = async function (username, password) {
+    // return new Promise((resolve, reject) => {
+    //     sql.connect(config).then(function () {
+    //         var request = new sql.Request();
+    //         request.query(`select * from tblUser where UserName = '${username}' and password = '${passHash}'`, function (err, recordset) {
+    //             if (err) {
+    //                 return reject(err);
+    //             }
+    //             resolve(recordset.recordset);
+    //         });
+    //     });
+    // })
+    return await UserModel.findOne({
+        where: {
+            UserName: username,
+        }
     })
 }
 

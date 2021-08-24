@@ -1,4 +1,10 @@
-import { connect, Request } from "mssql";
+const { connect, Request } = require('mssql');
+const Sequelize = require('sequelize-v5')
+const sequelize = require('./DAL/index').sequelize;
+const Op = Sequelize.Op
+
+const { InvoiceModel } = sequelize.Init();
+
 const config = {
     encrypt: false,
     user: "sa",
@@ -7,8 +13,60 @@ const config = {
     database: "EISV2",
 };
 
+export const GetInvoicesByIds = async (Ids, CustomerId) => {
+    const pool = await connect(config);
+    var request = new Request(pool);
+    const query = `SELECT * FROM tblivoice WHERE CustomerId = ${CustomerId} AND Id IN (${Ids.join(',')})`;
+    return (await request.query(query)).recordset;
+}
 
-const GetInvoiceCode = async () => {
+export const GetAccessedInvoices = async (CustomerId, FromDate, ToDate) => {
+    // const pool = await connect(config);
+    // var request = new Request(pool);
+    // const query = `SELECT * FROM tblIvoice i
+    //     WHERE i.CustomerId = ${CustomerId} AND ((i.CreateDate >= '${FromDate}' AND i.CreateDate <= '${ToDate}')
+    //     OR (i.DateofInvoice >= '${FromDate}' AND i.DateofInvoice <= '${ToDate}')
+    //     OR (i.DateofSign >= '${FromDate}' AND i.DateofSign <= '${ToDate}')
+    //     OR (i.ConvertDate >= '${FromDate}' AND i.ConvertDate <= '${ToDate}')
+    //     OR (i.ModifiedDate >= '${FromDate}' AND i.ModifiedDate <= '${ToDate}'))`
+    // return (await request.query(query)).recordset;
+
+    return await InvoiceModel.findAll({
+        where: {
+            CustomerId,
+            [Op.or]: [
+                {
+                    [Op.and]: [{ CreateDate: { [Op.gte]: FromDate } }, {
+                        CreateDate: { [Op.lte]: ToDate }
+                    }]
+                },
+                {
+                    [Op.and]: [{ ModifiedDate: { [Op.gte]: FromDate } }, {
+                        ModifiedDate: { [Op.lte]: ToDate }
+                    }]
+                },
+                {
+                    [Op.and]: [{ DateofInvoice: { [Op.gte]: FromDate } }, {
+                        DateofInvoice: { [Op.lte]: ToDate }
+                    }]
+                },
+                {
+                    [Op.and]: [{ DateofSign: { [Op.gte]: FromDate } }, {
+                        DateofSign: { [Op.lte]: ToDate }
+                    }]
+                },
+                {
+                    [Op.and]: [{ ConvertDate: { [Op.gte]: FromDate } }, {
+                        ConvertDate: { [Op.lte]: ToDate }
+                    }]
+                },
+            ]
+        }
+    });
+
+}
+
+export const GetInvoiceCode = async () => {
     await connect(config);
     var request = new Request();
     var date = Object.values((await (request.query(`SELECT GETDATE()`))).recordset[0])[0];
@@ -25,4 +83,40 @@ const GetInvoiceCode = async () => {
     sequence = sequence.toString().padStart(6, '0');
     var code = `${codebydate}${sequence}${chars[Math.floor(Math.random() * 33)]}${chars[Math.floor(Math.random() * 33)]}`
     return code;
+}
+
+export const VoidNotSignedInvoices = async (invoices, customerId) => {
+    var transaction;
+    try {
+        await sequelize.transaction({ autocommit: false }).then(async t => {
+            transaction = t;
+            for (var i = 0; i < invoices.length; i++) {
+                InvoiceModel.update({
+                    IvoiceCode: i.IvoiceCode, DateofSign: i.DateofInvoice, Status: 5
+                }, {
+                    where:
+                        { CustomerID: customerId, Id: invoices[i].Id },
+                    transaction: transaction
+                })
+            };
+        });
+        await transaction.commit();
+    } catch (error) {
+        if (transaction) await transaction.rollback();
+        throw error;
+    }
+}
+
+export const GetAdjustedLinks = async (Ids) => {
+    const pool = await connect(config);
+    const request = new Request(pool);
+    const query = `SELECT * FROM tblAdjustedInvoice WHERE InvoiceId IN (${Ids.join(',')}) OR AdjustedInvoiceId IN (${Ids.join(',')})`;
+    return (await request.query(query)).recordset;
+}
+
+export const GetReplacedLinks = async (Ids) => {
+    const pool = await connect(config);
+    const request = new Request(pool);
+    const query = `SELECT * FROM tblInvoiceReplace WHERE InvoiceId IN (${Ids.join(',')}) OR ReplaceInvoiceId IN (${Ids.join(',')})`;
+    return (await request.query(query)).recordset;
 }
