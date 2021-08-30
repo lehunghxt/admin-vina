@@ -1,15 +1,22 @@
 const UserModal = require("../Model/UserModal");
+const CryptoJS = require("crypto-js");
 
-module.exports.CheckLogin = function (username, password) {
-  return new Promise((resolve, reject) => {
-    UserModal.LoginUser(username, password).then((data) => {
-      if (data.length > 0) {
-        resolve(data[0]);
-      } else {
-        reject({});
-      }
-    });
-  });
+module.exports.CheckLogin = async function (username, password) {
+  // return new Promise((resolve, reject) => {
+  //   UserModal.LoginUser(username, password).then((data) => {
+  //     if (data) {
+  //       resolve(data.dataValues);
+  //     } else {
+  //       reject({});
+  //     }
+  //   });
+  // });
+  var passHash = CryptoJS.MD5(username + password).toString();
+
+  var user = (await UserModal.LoginUser(username, password)).dataValues;
+  if (!user) return null;
+  if (user.Password === passHash) return user;
+  return 'Wrong Pass'
 };
 
 module.exports.GetIdLockUser = function (taxcode) {

@@ -89,19 +89,27 @@ nextApp.prepare().then(() => {
     res.status(202).send();
   });
 
-  app.post("/auth/login", (req, res) => {
+  app.post("/auth/login", async (req, res) => {
     const { username, password } = req.body;
-    UserController.CheckLogin(username, password).then((data) => {
-      console.log(data);
-      UserController.GetUserRoleById(data.Id).then((roles) => {
-        data.roles = roles;
-        req.session.User = data;
-        req.session.save((err) => {
-          console.log(err);
-        });
-        return handle(req, res);
-      });
-    });
+    try {
+      var user = await UserController.CheckLogin(username, password);
+      if (typeof user == 'object') {
+        var roles = await UserController.GetUserRoleById(user.Id);
+        if (roles && roles.length > 0) {
+          user.roles = roles;
+          req.session.User = user;
+          req.session.save();
+          user.Password = undefined;
+          res.json(user)
+          //return handle(req, res);
+        }
+      }
+      //wrongpass
+      res.json(user);
+    } catch (error) {
+      console.log(error)
+      res.status(500).send();
+    }
   });
   app.all("*", (req, res) => {
     if (req.session.User) {
