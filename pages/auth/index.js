@@ -20,7 +20,7 @@ export default function Login() {
                                             <div className="text-center">
                                                 <h1 className="h4 text-gray-900 mb-4">Welcome Back!</h1>
                                             </div>
-                                            <FormLogin/>
+                                            <FormLogin />
                                             <hr />
                                             <div className="text-center">
                                                 <a className="small" href="forgot-password.html">Forgot Password?</a>
@@ -35,4 +35,10 @@ export default function Login() {
             </div>
         </div>
     );
+}
+
+export const getStaticProps = async () => {
+    return {
+        props: {}
+    }
 }

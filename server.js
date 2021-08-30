@@ -10,8 +10,7 @@ const nextApp = next({});
 const handle = nextApp.getRequestHandler();
 const session = require("express-session");
 const redirectLoop = require("express-redirect-loop");
-const UserController = require("./Controller/UserController");
-const lib = require("./helper");
+const lib = require("./Helper/FileHelper");
 
 app.use(
   session({
@@ -26,6 +25,8 @@ app.use(
     maxRedirects: 5,
   })
 );
+
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 // =============================LISTENING SOCKET.IO===============================
@@ -85,35 +86,32 @@ nextApp.prepare().then(() => {
     res.status(202).send();
   });
 
-  app.post("/auth/login", async (req, res) => {
-    const { username, password } = req.body;
+  //For next script and public
+  app.get('/_next/*', (req, res) => {
+    return handle(req, res);
+  });
+  app.get('/assets/*', (req, res) => {
+    return handle(req, res);
+  });
+  app.get('/auth', (req, res) => {
+    return handle(req, res);
+  })
+  app.post("/api/auth", async (req, res) => {
     try {
-      var user = await UserController.CheckLogin(username, password);
-      if (typeof user == 'object') {
-        var roles = await UserController.GetUserRoleById(user.Id);
-        if (roles && roles.length > 0) {
-          user.roles = roles;
-          req.session.User = user;
-          req.session.save();
-          user.Password = undefined;
-          res.json(user)
-          //return handle(req, res);
-        }
-      }
-      //wrongpass
-      res.json(user);
+      return handle(req, res);
     } catch (error) {
-      console.log(error)
+      console.log({ error })
       res.status(500).send();
     }
   });
+
   app.all("*", (req, res) => {
     if (req.session.User) {
       console.log("Da dang nhap vao he thong");
       return handle(req, res);
     } else {
       console.log("Chua dang nhap vao he thong");
-      return nextApp.render(req, res, "/auth/login", req.query);
+      return res.redirect("/auth");
     }
   });
   server.listen(port, (err) => {

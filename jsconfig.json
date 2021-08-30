@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@Helper/*": [
+                "Helper/*"
+            ],
+            "@Controller/*": [
+                "Controller/*"
+            ]
+        }
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}

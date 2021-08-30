@@ -1,5 +1,5 @@
 import Head from "next/head";
-import Link from "next/dist/client/link";
+import Link from "next/link";
 
 function Home() {
   return (
@@ -117,8 +117,6 @@ function Home() {
 }
 
 export const getServerSideProps = function ({ req, res }) {
-  console.log("Page Index Render");
-  //console.log(req.sessionStore);
   return {
     props: {},
   };

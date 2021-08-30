@@ -224,7 +224,14 @@ function LockUser() {
 }
 
 export const getServerSideProps = function ({ req, res }) {
-  console.log("Page LockUser Render");
+  if (!req.session.User.Roles.includes('khoa_tk')) {
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/401",
+      }
+    }
+  }
   return {
     props: {},
   };

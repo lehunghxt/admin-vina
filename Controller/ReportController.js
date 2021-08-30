@@ -1,5 +1,13 @@
 const { connect, Request } = require("mssql");
 import { GetAccessedInvoices, GetInvoiceCode, VoidNotSignedInvoices, GetInvoicesByIds, GetAdjustedLinks, GetReplacedLinks } from "../Model/InvoiceModel";
+
+const sequelize = require("../Model/DAL/").sequelize;
+const _CustomerModel = require("../Model/DAL/tblCustomer");
+const _InvoiceModel = require("../Model/DAL/tblIvoice");
+
+const CustomerModel = _CustomerModel(sequelize);
+const InvoiceModel = _InvoiceModel(sequelize);
+
 import ReportTaxMaster from '../class/ReportTaxMasterModel';
 const { DOMParser } = require('xmldom')
 const config = {
@@ -10,7 +18,7 @@ const config = {
     database: "EISV2",
 };
 
-export const PrepareTaxCode = async (ProvinceId, FromDate, ToDate) => {
+export const PrepareTaxCode = async (ProvinceId, FromDate, ToDate, Taxcode) => {
     // await connect(config);
     // var request = new Request();
     // const query =
@@ -23,6 +31,13 @@ export const PrepareTaxCode = async (ProvinceId, FromDate, ToDate) => {
     //     OR (i.ModifiedDate >= '${FromDate}' AND i.ModifiedDate <= '${ToDate}'))`
     // var data = (await request.query(query)).recordset;
     // return data;
+
+    var queryWhere = {
+        ProvinceId
+    }
+
+    if (Taxcode) queryWhere = { ...queryWhere, Taxcode }
+
     CustomerModel.hasMany(InvoiceModel, { foreignKey: 'CustomerId' })
     InvoiceModel.belongsTo(CustomerModel, { foreignKey: 'CustomerId' })
     var data = await CustomerModel.findAll({
@@ -63,12 +78,13 @@ export const PrepareTaxCode = async (ProvinceId, FromDate, ToDate) => {
             },
         }],
         raw: true,
+        where: queryWhere
     })
     return data;
 }
 
 export const ExportHaNoiData = async (Customers, FromDate, ToDate) => {
-    Customers.forEach(customer => {
+    Customers.forEach(async customer => {
         var invoices = await GetAccessedInvoices(customer.Id, FromDate, ToDate);
         const invoiceIds = invoices.map(e => parseInt(e.Id));
         const NoticeIds = [...new Set(invoices.map(i => parseInt(i.NoticeIssuedId)))];
@@ -84,7 +100,7 @@ export const ExportHaNoiData = async (Customers, FromDate, ToDate) => {
                 if (ListNotSigned && ListNotSigned.length > 0) {
                     //UpdateInvoiceNotSigned
                     var ListNeedUpdate = [];
-                    ListNotSigned.forEach(e => {
+                    ListNotSigned.forEach(async e => {
                         var invoice = invoices.find(i => i.Id == e.Id);
                         if (!({ IvoiceCode } = invoice))
                             invoice.IvoiceCode = await GetInvoiceCode();
@@ -191,4 +207,18 @@ const MapToTaxHaNoiData = (invoices) => {
         }
         result.push(invoice)
     })
+}
+
+Array.prototype.split = (chunk_size) => {
+    if (!this.length) return;
+    var results = [];
+    while (this.length) {
+        results.push(this.splice(0, chunk_size));
+    }
+    return results;
+};
+
+const GetTaxReportDetail = async (invoices) => {
+    const invoiceIds = invoices.map(e => parseInt(e.Id));
+    invoiceIds = invoiceIds.chunks(1000);
 }

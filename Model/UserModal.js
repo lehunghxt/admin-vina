@@ -1,7 +1,6 @@
 const sql = require("mssql");
-const { sequelize } = require('./DAL/index');
-const models = sequelize.Init();
-const { UserModel } = models;
+const { sequelize } = require('./DAL/');
+const _UserModel = require('./DAL/tblUser');
 const config = {
     encrypt: false,
     user: 'sa',
@@ -9,6 +8,8 @@ const config = {
     server: '10.0.0.51',
     database: 'EISV2',
 };
+
+const UserModel = _UserModel(sequelize);
 
 module.exports.LoginUser = async function (username, password) {
     // return new Promise((resolve, reject) => {
@@ -56,7 +57,6 @@ module.exports.GetUserRolesById = async function (Id) {
     var rolesData = (await request.query(query)).recordset[0].data;
     var roles = rolesData.split(',').filter(e => e != "" && e != undefined);
     roles = Array.from(new Set(roles));
-    console.log(roles.join("','"))
     const query2 = `SELECT RoleId FROM Role WHERE RoleId IN('${roles.join("','")}')`
     var data = (await request.query(query2)).recordset;
     var result = data.map(e => e.RoleId);

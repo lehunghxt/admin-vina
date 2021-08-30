@@ -1,9 +1,10 @@
 const { connect, Request } = require('mssql');
 const Sequelize = require('sequelize-v5')
 const sequelize = require('./DAL/index').sequelize;
-const Op = Sequelize.Op
+const _InvoiceModel = require('./DAL/tblIvoice');
+const Op = Sequelize.Op;
 
-const { InvoiceModel } = sequelize.Init();
+var InvoiceModel = _InvoiceModel(sequelize);
 
 const config = {
     encrypt: false,
@@ -119,4 +120,8 @@ export const GetReplacedLinks = async (Ids) => {
     const request = new Request(pool);
     const query = `SELECT * FROM tblInvoiceReplace WHERE InvoiceId IN (${Ids.join(',')}) OR ReplaceInvoiceId IN (${Ids.join(',')})`;
     return (await request.query(query)).recordset;
+}
+
+export const GetInvoiceDetailsByInvoiceIds = async (Ids) => {
+
 }

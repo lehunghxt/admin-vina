@@ -1,28 +1,17 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { Post } from '@Helper/ApiHelper'
 import { useRouter } from "next/router";
 export default function FormLogin() {
   const [user, setUser] = useState({ username: '', password: '' });
   const router = useRouter();
-  const hanleSubmit = (event) => {
+  const hanleSubmit = async (event) => {
     event.preventDefault();
-    axios
-      .post("/auth/login", {
-        username: event.target.username.value,
-        password: event.target.password.value,
-      })
-      .then(function (response) {
-        if (response && typeof response.data === 'object') {
-          router.push("/");
-        }
-        else {
-          console.log(response.data)
-          //alert(response.data)
-        }
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+    var res = await Post("/auth", {
+      username: user.username,
+      password: user.password,
+    });
+    if (res) return router.push('/');
+    alert('Wrong Username or Password');
   };
   const handleInputChange = (e) => {
     setUser({
