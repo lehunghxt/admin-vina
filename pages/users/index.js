@@ -9,56 +9,18 @@ export const getServerSideProps = function ({ req, res }) {
 export default function ListUser() {
   return (
     <>
-        <h1 className="h3 mb-2 text-gray-800">Tables</h1>
+        <h1 className="h3 mb-2 text-gray-800">Danh sách user</h1>
         <div className="card shadow mb-4">
-          <div className="card-header py-3">
-            <h6 className="m-0 font-weight-bold text-primary">
-              DataTables Example
-            </h6>
-          </div>
           <div className="card-body">
             <div className="table-responsive">
               <div
                 id="dataTable_wrapper"
                 className="dataTables_wrapper dt-bootstrap4"
               >
-                <div className="row">
-                  <div className="col-sm-12 col-md-6">
-                    <div className="dataTables_length" id="dataTable_length">
-                      <label>
-                        Show
-                        <select
-                          name="dataTable_length"
-                          aria-controls="dataTable"
-                          className="custom-select custom-select-sm form-control form-control-sm"
-                        >
-                          <option value="10">10</option>
-                          <option value="25">25</option>
-                          <option value="50">50</option>
-                          <option value="100">100</option>
-                        </select>
-                        entries
-                      </label>
-                    </div>
-                  </div>
-                  <div className="col-sm-12 col-md-6">
-                    <div id="dataTable_filter" className="dataTables_filter">
-                      <label>
-                        Search:
-                        <input
-                          type="search"
-                          className="form-control form-control-sm"
-                          placeholder=""
-                          aria-controls="dataTable"
-                        />
-                      </label>
-                    </div>
-                  </div>
-                </div>
-                <div className="row">
+               <div className="row">
                   <div className="col-sm-12">
                     <table
-                      className="table table-bordered dataTable"
+                      className="table table-bordered table-sm dataTable"
                       id="dataTable"
                       width="100%"
                       cellSpacing="0"
@@ -136,29 +98,7 @@ export default function ListUser() {
                           </th>
                         </tr>
                       </thead>
-                      <tfoot>
-                        <tr>
-                          <th rowSpan="1" colSpan="1">
-                            Name
-                          </th>
-                          <th rowSpan="1" colSpan="1">
-                            Position
-                          </th>
-                          <th rowSpan="1" colSpan="1">
-                            Office
-                          </th>
-                          <th rowSpan="1" colSpan="1">
-                            Age
-                          </th>
-                          <th rowSpan="1" colSpan="1">
-                            Start date
-                          </th>
-                          <th rowSpan="1" colSpan="1">
-                            Salary
-                          </th>
-                        </tr>
-                      </tfoot>
-                      <tbody>
+                    <tbody>
                         <tr role="row" className="odd">
                           <td className="sorting_1">Airi Satou</td>
                           <td>Accountant</td>
