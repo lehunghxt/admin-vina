@@ -71,6 +71,10 @@ io.on("connection", (socket) => {
 });
 //================================================================================
 nextApp.prepare().then(() => {
+  // app.get("/", async () => {
+  //   require('./Model/UserModalSequelize');
+  // });
+
   app.post("/taxcode", async function (req, res) {
     var { taxcode } = req.body;
     var taxcodes = await lib.ReadFile("taxcodes.txt");
@@ -88,15 +92,15 @@ nextApp.prepare().then(() => {
   app.post("/auth/login", (req, res) => {
     const { username, password } = req.body;
     UserController.CheckLogin(username, password).then((data) => {
-      console.log(data)
-      UserController.GetUserRoleById(data.Id).then(roles => {
+      console.log(data);
+      UserController.GetUserRoleById(data.Id).then((roles) => {
         data.roles = roles;
         req.session.User = data;
         req.session.save((err) => {
           console.log(err);
         });
         return handle(req, res);
-      })
+      });
     });
   });
   app.all("*", (req, res) => {
