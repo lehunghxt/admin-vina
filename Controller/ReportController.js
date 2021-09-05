@@ -1,43 +1,19 @@
-const { connect, Request } = require("mssql");
-import { GetAccessedInvoices, GetInvoiceCode, VoidNotSignedInvoices, GetInvoicesByIds, GetAdjustedLinks, GetReplacedLinks } from "../Model/InvoiceModel";
+import { GetInvoiceCode, VoidNotSignedInvoices, GetInvoicesByIds, GetAdjustedLinks, GetReplacedLinks } from "../Model/InvoiceModel";
+const path = require("path");
 
 const sequelize = require("../Model/DAL/").sequelize;
 const _CustomerModel = require("../Model/DAL/tblCustomer");
 const _InvoiceModel = require("../Model/DAL/tblIvoice");
+const _InvoiceDetailModel = require("../Model/DAL/tblIvoiceDetail");
 
 const CustomerModel = _CustomerModel(sequelize);
 const InvoiceModel = _InvoiceModel(sequelize);
+const InvoiceDetailModel = _InvoiceDetailModel(sequelize);
 
 import ReportTaxMaster from '../class/ReportTaxMasterModel';
 const { DOMParser } = require('xmldom')
-const config = {
-    encrypt: false,
-    user: "sa",
-    password: "SqlAsap@123",
-    server: "10.0.0.51",
-    database: "EISV2",
-};
 
-export const PrepareTaxCode = async (ProvinceId, FromDate, ToDate, Taxcode) => {
-    // await connect(config);
-    // var request = new Request();
-    // const query =
-    //     `SELECT DISTINCT (c.Id), c.taxcode, c.IsKeepInvocie FROM tblcustomer c
-    //     JOIN tblIvoice i ON i.CustomerId = c.Id
-    //     WHERE c.ProvinceId = '${ProvinceId}' AND ((i.CreateDate >= '${FromDate}' AND i.CreateDate <= '${ToDate}')
-    //     OR (i.DateofInvoice >= '${FromDate}' AND i.DateofInvoice <= '${ToDate}')
-    //     OR (i.DateofSign >= '${FromDate}' AND i.DateofSign <= '${ToDate}')
-    //     OR (i.ConvertDate >= '${FromDate}' AND i.ConvertDate <= '${ToDate}')
-    //     OR (i.ModifiedDate >= '${FromDate}' AND i.ModifiedDate <= '${ToDate}'))`
-    // var data = (await request.query(query)).recordset;
-    // return data;
-
-    var queryWhere = {
-        ProvinceId
-    }
-
-    if (Taxcode) queryWhere = { ...queryWhere, Taxcode }
-
+export const PrepareTaxCode = async (ProvinceId, FromDate, ToDate) => {
     CustomerModel.hasMany(InvoiceModel, { foreignKey: 'CustomerId' })
     InvoiceModel.belongsTo(CustomerModel, { foreignKey: 'CustomerId' })
     var data = await CustomerModel.findAll({
@@ -78,12 +54,49 @@ export const PrepareTaxCode = async (ProvinceId, FromDate, ToDate, Taxcode) => {
             },
         }],
         raw: true,
-        where: queryWhere
+        where: {
+            ProvinceId
+        }
     })
     return data;
 }
 
-export const ExportHaNoiData = async (Customers, FromDate, ToDate) => {
+const GetAccessedInvoices = async (CustomerId, FromDate, ToDate) => {
+    return await InvoiceModel.findAll({
+        where: {
+            CustomerId,
+            $or: [
+                {
+                    $and: [{ CreateDate: { $gte: FromDate } }, {
+                        CreateDate: { $lte: ToDate }
+                    }]
+                },
+                {
+                    $and: [{ ModifiedDate: { $gte: FromDate } }, {
+                        ModifiedDate: { $lte: ToDate }
+                    }]
+                },
+                {
+                    $and: [{ DateofInvoice: { $gte: FromDate } }, {
+                        DateofInvoice: { $lte: ToDate }
+                    }]
+                },
+                {
+                    $and: [{ DateofSign: { $gte: FromDate } }, {
+                        DateofSign: { $lte: ToDate }
+                    }]
+                },
+                {
+                    $and: [{ ConvertDate: { $gte: FromDate } }, {
+                        ConvertDate: { $lte: ToDate }
+                    }]
+                },
+            ]
+        }
+    });
+}
+
+export const ExportHaNoiData = async (Customers, FromDate, ToDate, Type) => {
     Customers.forEach(async customer => {
         var invoices = await GetAccessedInvoices(customer.Id, FromDate, ToDate);
         const invoiceIds = invoices.map(e => parseInt(e.Id));
@@ -166,8 +179,10 @@ export const ExportHaNoiData = async (Customers, FromDate, ToDate) => {
                     })
                 }
             }
-            MapToTaxHaNoiData(invoices);
+            invoices = MapToTaxHaNoiData(invoices);
         }
+        var details = await GetTaxReportDetail(invoices, invoiceIds);
+        ExportExcel(customer.Taxcode, invoices, details, Type);
     });
 }
 
@@ -207,18 +222,275 @@ const MapToTaxHaNoiData = (invoices) => {
         }
         result.push(invoice)
     })
+    return result;
 }
 
-Array.prototype.split = (chunk_size) => {
-    if (!this.length) return;
+const GetTaxReportDetail = async (invoices, invoiceIds) => {
+    invoiceIds = SplitArray(invoiceIds, 1000);
+    var details = [];
+    invoiceIds.forEach(async ids => {
+        var detailpart = await InvoiceDetailModel.findAll({
+            where: {
+                $in: ids
+            }
+        })
+        details.push(detailpart);
+    });
+    for (let x = 0; x < invoices.length; x++) {
+        let invoice = invoices[x];
+        let invoiceDetails = details.filter(e => e.IvoiceId == invoice.Id);
+        for (let y = 0; y < array.length; y++) {
+            invoiceDetails[y].Tax = (invoiceDetails[y].Tax == 0 && invoice.Tax != 0) ? invoice.Tax : invoiceDetails[y].Tax;
+            invoiceDetails[y].TemptCode = invoice.TemptCode;
+            invoiceDetails[y].Symbol = invoice.Symbol;
+            invoiceDetails[y].InvoiceNumber = invoice.InvoiceNumber;
+
+            invoiceDetails[y].Tax = invoiceDetails[y].Tax == -1 ? 0 : invoiceDetails[y].Tax;
+            invoiceDetails[y].MoneyTax = invoiceDetails[y].MoneyTax ? invoiceDetails[y].MoneyTax : (invoiceDetails[y].TotalMoney * invoiceDetails[y].Tax / 100);
+            if (invoiceDetails[y].Discount && y > 0 && invoiceDetails[y].IvoiceId == invoiceDetails[y - 1].IvoiceId) {
+                invoiceDetails[y].DiscountMoney = invoiceDetails[y].TotalMoney;
+                invoiceDetails[y].TotalMoneyAfterTax = 0;
+                invoiceDetails[y].Tax = 0;
+                invoiceDetails[y].MoneyTax = 0;
+                invoiceDetails[y].TotalMoney = 0;
+
+                invoiceDetails[i - 1].TotalMoney = invoiceDetails[i - 1].TotalMoney - invoiceDetails[y].DiscountMoney;
+                invoiceDetails[i - 1].MoneyTax = invoiceDetails[i - 1].TotalMoney * invoiceDetails[i - 1].Tax / 100;
+                invoiceDetails[i - 1].TotalMoney = invoiceDetails[i - 1].TotalMoney + invoiceDetails[i - 1].MoneyTax;
+            }
+            else if (invoiceDetails[y].Discount && y > 0 && invoiceDetails[y].IvoiceId == invoiceDetails[y + 1].IvoiceId) {
+                invoiceDetails[y].DiscountMoney = invoiceDetails[y].TotalMoney;
+                invoiceDetails[y].TotalMoneyAfterTax = 0;
+                invoiceDetails[y].Tax = 0;
+                invoiceDetails[y].MoneyTax = 0;
+                invoiceDetails[y].TotalMoney = 0;
+
+                invoiceDetails[i + 1].TotalMoney = invoiceDetails[i + 1].TotalMoney - invoiceDetails[y].DiscountMoney;
+                invoiceDetails[i + 1].MoneyTax = invoiceDetails[i + 1].TotalMoney * invoiceDetails[i + 1].Tax / 100;
+                invoiceDetails[i + 1].TotalMoney = invoiceDetails[i + 1].TotalMoney + invoiceDetails[i + 1].MoneyTax;
+            }
+        }
+        invoices[x].Details = invoiceDetails;
+    }
+    return invoices;
+}
+
+const SplitArray = (array, chunk_size) => {
+    if (!array.length) return;
     var results = [];
-    while (this.length) {
-        results.push(this.splice(0, chunk_size));
+    while (array.length) {
+        results.push(array.splice(0, chunk_size));
     }
     return results;
 };
 
-const GetTaxReportDetail = async (invoices) => {
-    const invoiceIds = invoices.map(e => parseInt(e.Id));
-    invoiceIds = invoiceIds.chunks(1000);
+const ExportExcel = async (taxcode, invoices, details, type) => {
+    const dirpath = `/ExportExcel/${d.getDate().toString().padStart(2, '0')}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getFullYear()}`;
+    if (type == 1) {
+        //#region Hanle Files
+        let MasterWorkbook;
+        MasterWorkbook = await new Excel.Workbook().xlsx.readFile(path.join(__dirname + '/public/TaxReportMasterTemplate.xlsx'))
+        let sheetToClone = MasterWorkbook.getWorksheet("Hoadon_Master");
+        let copySheetMaster = MasterWorkbook.addWorksheet(`${taxcode}`);
+        copySheetMaster.model = sheetToClone.model;
+        copySheetMaster.name = `${taxcode}`;
+        let DetailWorkbook;
+        DetailWorkbook = await new Excel.Workbook().xlsx.readFile(path.join(__dirname + '/public/TaxReportDetailTemplate.xlsx'))
+        let sheetToClone = DetailWorkbook.getWorksheet("Hoadon_Detail");
+        let copySheetDetail = DetailWorkbook.addWorksheet(`${taxcode}`);
+        copySheetDetail.model = sheetToClone.model;
+        copySheetDetail.name = `${taxcode}`;
+        //#endregion
+
+        //#region Master
+        for (let i = 0; i < invoices.length; i++) {
+            let loaihoadon = "";
+            let d = invoices[i];
+            if (d.TemptCode.Contains("GTKT")) loaihoadon = "Hóa đơn giá trị gia tăng";
+            else if (d.TemptCode.Contains("GTTT")) loaihoadon = "Hóa đơn bán hàng";
+            else if (d.TemptCode.Contains("XKNB")) loaihoadon = "Hóa đơn xuất kho kiêm vận chuyển nội bộ";
+
+            let masterrow = [];
+            masterrow[1] = d.Id.toString().padStart(9, '0');
+            masterrow[2] = d.InvoiceCode;
+            masterrow[3] = d.TemptCode.Split('/')[0].trimEnd('0');
+            masterrow[4] = loaihoadon;
+            masterrow[5] = d.TemptCode;
+            masterrow[6] = d.Symbol;
+            masterrow[7] = d.InvoiceNumber.toString().padStart(7, '0');
+            masterrow[8] = d.Status;
+            masterrow[9] = d.DateofInvoice;
+            masterrow[10] = d.IsConvert;
+            masterrow[11] = (d.IsConvert.includes("true")) ? d.ConvertDate : null;
+            masterrow[12] = d.MoneyCode;
+            masterrow[13] = d.ExchangeRate;
+            masterrow[14] = d.SellerName;
+            masterrow[15] = d.SellerTaxCode;
+            masterrow[16] = d.SellerAddress;
+            masterrow[17] = d.CompanyName ? d.CompanyName : d.ContractName;
+            masterrow[18] = d.CompanyTaxcode;
+            masterrow[19] = d.CompanyAdd;
+            masterrow[20] = d.TotalMoneyNoTax;
+            masterrow[21] = d.MoneyTax;
+            masterrow[22] = d.TotalServiceAmount;
+            masterrow[23] = d.TotalMoney;
+            masterrow[24] = d.TotalAmountInWords;
+            masterrow[25] = d.SellerCertificate;
+            masterrow[26] = d.DateofSign != null ? d.DateofSign : d.DateofInvoice;
+            masterrow[27] = d.BuyerCertificate;
+            masterrow[28] = d.SignXMLBuy ? d.BuyerSignDate : null;
+            masterrow[29] = "0309612872";
+            masterrow[30] = "SMARTVAS";
+            masterrow[31] = masterData[i].ProcessedInvoiceCode;
+            masterrow[32] = masterData[i].ProcessedDate;
+            masterrow[33] = "";
+            masterrow[34] = "http://tracuu.smartvas.vn";
+            copySheetMaster.addRow(masterrow);
+        }
+
+        MasterWorkbook.xlsx.writeFile(path.join(__dirname + `/ExportExcel/${dirpath}/TaxReportMaster.xlsx`));
+        //#endregion
+
+        //#region Detail
+
+        let CurrentInvoiceNumber = details[0].InvoiceNumber;
+        let STT = 1;
+        for (let i = 0; i < details.length; i++) {
+            let detail = details[i];
+            var detailrow = [];
+            detailrow[1] = detail.IvoiceId.toString().padStart(9, '0');
+            detailrow[2] = "SMARTVAS";
+            detailrow[3] = detail.TemptCode.Split('/')[0].trimEnd('0');
+            detailrow[4] = detail.TemptCode;
+            detailrow[5] = detail.Symbol;
+            detailrow[6] = detail.InvoiceNumber.toString().padStart(7, '0');
+            detailrow[7] = Taxcode;
+
+            if (CurrentInvoiceNumber != detail.InvoiceNumber) {
+                CurrentInvoiceNumber = detail.InvoiceNumber;
+                STT = 1;
+            }
+
+            detailrow[8] = STT;
+            detailrow[9] = detail.ProductName;
+            detailrow[10] = detail.Unit;
+            detailrow[11] = detail.Number;
+            detailrow[12] = detail.Price;
+            detailrow[13] = '';
+            detailrow[14] = detail.DiscountMoney;
+            detailrow[15] = detail.TotalMoney;
+            detailrow[16] = detail.Tax;
+            detailrow[17] = detail.MoneyTax;
+            detailrow[18] = detail.TotalMoneyAfterTax;
+            detailrow[19] = '';
+            detailrow[20] = '';
+            STT += 1;
+            copySheetDetail.addRow(detailrow);
+        }
+        //#endregion
+
+        //WriteFile
+        DetailWorkbook.xlsx.writeFile(path.join(__dirname + `/ExportExcel/${dirpath}/TaxReportDetail.xlsx`));
+    }
+    else {
+        //#region Hanle Files
+        let workbook = await new Excel.Workbook().xlsx.readFile(path.join(__dirname + '/public/TaxReportTemplate.xlsx'));
+        let sheetToCloneMaster = workbook.getWorksheet("Hoadon_Master");
+        let copySheetMaster = workbook.addWorksheet("Hoadon_Master");
+        let sheetToCloneDetail = workbook.getWorksheet("Hoadon_Detail");
+        let copySheetDetail = workbook.addWorksheet("Hoadon_Detail");
+
+        copySheetMaster.model = sheetToCloneMaster.model;
+        copySheetMaster.name = "Hoadon_Master";
+        copySheetDetail.model = sheetToCloneDetail.model;
+        copySheetDetail.name = "Hoadon_Detail";
+        //#endregion
+
+        //#region Master
+        for (let i = 0; i < invoices.length; i++) {
+            let loaihoadon = "";
+            let d = invoices[i];
+            if (d.TemptCode.Contains("GTKT")) loaihoadon = "Hóa đơn giá trị gia tăng";
+            else if (d.TemptCode.Contains("GTTT")) loaihoadon = "Hóa đơn bán hàng";
+            else if (d.TemptCode.Contains("XKNB")) loaihoadon = "Hóa đơn xuất kho kiêm vận chuyển nội bộ";
+
+            let masterrow = [];
+            masterrow[1] = d.Id.toString().padStart(9, '0');
+            masterrow[2] = d.InvoiceCode;
+            masterrow[3] = d.TemptCode.Split('/')[0].trimEnd('0');
+            masterrow[4] = loaihoadon;
+            masterrow[5] = d.TemptCode;
+            masterrow[6] = d.Symbol;
+            masterrow[7] = d.InvoiceNumber.toString().padStart(7, '0');
+            masterrow[8] = d.Status;
+            masterrow[9] = d.DateofInvoice;
+            masterrow[10] = d.IsConvert;
+            masterrow[11] = (d.IsConvert.includes("true")) ? d.ConvertDate : null;
+            masterrow[12] = d.MoneyCode;
+            masterrow[13] = d.ExchangeRate;
+            masterrow[14] = d.SellerName;
+            masterrow[15] = d.SellerTaxCode;
+            masterrow[16] = d.SellerAddress;
+            masterrow[17] = d.CompanyName ? d.CompanyName : d.ContractName;
+            masterrow[18] = d.CompanyTaxcode;
+            masterrow[19] = d.CompanyAdd;
+            masterrow[20] = d.TotalMoneyNoTax;
+            masterrow[21] = d.MoneyTax;
+            masterrow[22] = d.TotalServiceAmount;
+            masterrow[23] = d.TotalMoney;
+            masterrow[24] = d.TotalAmountInWords;
+            masterrow[25] = d.SellerCertificate;
+            masterrow[26] = d.DateofSign != null ? d.DateofSign : d.DateofInvoice;
+            masterrow[27] = d.BuyerCertificate;
+            masterrow[28] = d.SignXMLBuy ? d.BuyerSignDate : null;
+            masterrow[29] = "0309612872";
+            masterrow[30] = "SMARTVAS";
+            masterrow[31] = masterData[i].ProcessedInvoiceCode;
+            masterrow[32] = masterData[i].ProcessedDate;
+            masterrow[33] = "";
+            masterrow[34] = "http://tracuu.smartvas.vn";
+            copySheetMaster.addRow(masterrow);
+        }
+        //#endregion
+
+        //#region Detail
+        let CurrentInvoiceNumber = details[0].InvoiceNumber;
+        let STT = 1;
+        for (let i = 0; i < details.length; i++) {
+            let detail = details[i];
+            var detailrow = [];
+            detailrow[1] = detail.IvoiceId.toString().padStart(9, '0');
+            detailrow[2] = "SMARTVAS";
+            detailrow[3] = detail.TemptCode.Split('/')[0].trimEnd('0');
+            detailrow[4] = detail.TemptCode;
+            detailrow[5] = detail.Symbol;
+            detailrow[6] = detail.InvoiceNumber.toString().padStart(7, '0');
+            detailrow[7] = Taxcode;
+
+            if (CurrentInvoiceNumber != detail.InvoiceNumber) {
+                CurrentInvoiceNumber = detail.InvoiceNumber;
+                STT = 1;
+            }
+
+            detailrow[8] = STT;
+            detailrow[9] = detail.ProductName;
+            detailrow[10] = detail.Unit;
+            detailrow[11] = detail.Number;
+            detailrow[12] = detail.Price;
+            detailrow[13] = '';
+            detailrow[14] = detail.DiscountMoney;
+            detailrow[15] = detail.TotalMoney;
+            detailrow[16] = detail.Tax;
+            detailrow[17] = detail.MoneyTax;
+            detailrow[18] = detail.TotalMoneyAfterTax;
+            detailrow[19] = '';
+            detailrow[20] = '';
+            STT += 1;
+            copySheetDetail.addRow(detailrow);
+        }
+        //#endregion
+
+        //WriteFile
+        workbook.xlsx.writeFile(path.join(__dirname + `/ExportExcel/${dirpath}/${taxcode}.xlsx`));
+    }
 }

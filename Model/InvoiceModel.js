@@ -21,52 +21,6 @@ export const GetInvoicesByIds = async (Ids, CustomerId) => {
     return (await request.query(query)).recordset;
 }
 
-export const GetAccessedInvoices = async (CustomerId, FromDate, ToDate) => {
-    // const pool = await connect(config);
-    // var request = new Request(pool);
-    // const query = `SELECT * FROM tblIvoice i
-    //     WHERE i.CustomerId = ${CustomerId} AND ((i.CreateDate >= '${FromDate}' AND i.CreateDate <= '${ToDate}')
-    //     OR (i.DateofInvoice >= '${FromDate}' AND i.DateofInvoice <= '${ToDate}')
-    //     OR (i.DateofSign >= '${FromDate}' AND i.DateofSign <= '${ToDate}')
-    //     OR (i.ConvertDate >= '${FromDate}' AND i.ConvertDate <= '${ToDate}')
-    //     OR (i.ModifiedDate >= '${FromDate}' AND i.ModifiedDate <= '${ToDate}'))`
-    // return (await request.query(query)).recordset;
-
-    return await InvoiceModel.findAll({
-        where: {
-            CustomerId,
-            [Op.or]: [
-                {
-                    [Op.and]: [{ CreateDate: { [Op.gte]: FromDate } }, {
-                        CreateDate: { [Op.lte]: ToDate }
-                    }]
-                },
-                {
-                    [Op.and]: [{ ModifiedDate: { [Op.gte]: FromDate } }, {
-                        ModifiedDate: { [Op.lte]: ToDate }
-                    }]
-                },
-                {
-                    [Op.and]: [{ DateofInvoice: { [Op.gte]: FromDate } }, {
-                        DateofInvoice: { [Op.lte]: ToDate }
-                    }]
-                },
-                {
-                    [Op.and]: [{ DateofSign: { [Op.gte]: FromDate } }, {
-                        DateofSign: { [Op.lte]: ToDate }
-                    }]
-                },
-                {
-                    [Op.and]: [{ ConvertDate: { [Op.gte]: FromDate } }, {
-                        ConvertDate: { [Op.lte]: ToDate }
-                    }]
-                },
-            ]
-        }
-    });
-
-}
-
 export const GetInvoiceCode = async () => {
     await connect(config);
     var request = new Request();
@@ -120,8 +74,4 @@ export const GetReplacedLinks = async (Ids) => {
     const request = new Request(pool);
     const query = `SELECT * FROM tblInvoiceReplace WHERE InvoiceId IN (${Ids.join(',')}) OR ReplaceInvoiceId IN (${Ids.join(',')})`;
     return (await request.query(query)).recordset;
-}
-
-export const GetInvoiceDetailsByInvoiceIds = async (Ids) => {
-
 }

@@ -30,9 +30,7 @@ async function Post(req, res, next) {
     const { username, password } = req.body;
     var user = await CheckLogin(username, password);
     if (user) {
-        console.time("MyTimer");
         var roles = await GetUserRoleById(user.Id);
-        console.timeLog("MyTimer");
         if (roles && roles.length > 0) {
             user.Roles = roles;
             user.Password = undefined;

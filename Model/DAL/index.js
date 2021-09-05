@@ -30,7 +30,8 @@ const sequelize = new Sequelize({
         $lt: Op.lt,
         $lte: Op.lte,
         $gte: Op.gte,
-        $like: Op.like
+        $like: Op.like,
+        $in: Op.in
     },
     logging: console.log,
     logging: function (str) {

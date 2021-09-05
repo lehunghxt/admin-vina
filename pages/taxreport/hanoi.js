@@ -1,4 +1,4 @@
-import { Post } from '@Helper/ApiHelper'
+import { Get, Post } from '@Helper/ApiHelper'
 import { useCallback, useState } from 'react'
 import { useUser } from 'Provider/UserProvider'
 
@@ -81,14 +81,7 @@ function Hanoi() {
 
     const handleSubmit = async (e, type) => {
         try {
-
             e.preventDefault();
-            // if (type == 2) {
-            //     Post('taxreport', query)
-            // }
-            // else {
-            //     Post('taxreport', query)
-            // }
             if (User.UserType !== 1 && !query.taxcode) {
                 alert("Vui lòng nhập mã số thuế");
                 return false;
@@ -97,12 +90,14 @@ function Hanoi() {
                 alert("Ngày không hợp lệ");
                 return false;
             }
-            var data = await Post('taxreport', query);
+            query.type = type;
+            var data = await Get('taxreport', { params: query });
             if (data.error) {
                 alert(data.error);
                 return false;
             }
             setTaxcodes(data || []);
+            setSearchtaxcodes(data || []);
         }
         catch (e) {
             console.log(e);
@@ -124,7 +119,7 @@ function Hanoi() {
                                 id="taxcode"
                                 className="form-control"
                                 value={query.taxcode}
-                                onChange={(e) => handleInputChange(e)}
+                                onChange={handleInputChange}
                             />
                         </div>
                         <div className="col-md-3">
@@ -137,7 +132,7 @@ function Hanoi() {
                                 id="fromdate"
                                 className="form-control"
                                 value={query.fromdate}
-                                onChange={(e) => handleInputChange(e)}
+                                onChange={handleInputChange}
                             />
                         </div>
                         <div className="col-md-3">
@@ -150,7 +145,7 @@ function Hanoi() {
                                 id="todate"
                                 className="form-control"
                                 value={query.todate}
-                                onChange={(e) => handleInputChange(e)}
+                                onChange={handleInputChange}
                             />
                         </div>
                         <div className="col-md-3">
@@ -171,34 +166,43 @@ function Hanoi() {
             </div>
             <hr />
             <div className="card">
-                <div className="card-header d-flex">
-                    <input type="search" onChange={(e) => handleSearch(e)} value={taxcode} className="form-controll" />
+                <div className="card-header d-flex justify-content-end">
+                    <label><input type="search" onChange={handleSearch} value={taxcode} className="form-controll" />&nbsp;Tìm <i className="fa fa-search"></i></label>
                 </div>
-                <div className="card-body d-flex">
-                    <form className="w-100" onSubmit={e => handleSubmit(e, 2)}>
-                        {searchtaxcodes && searchtaxcodes.length > 0 ? searchtaxcodes.map(t => {
-                            return <>
-                                <span key={t.Id} style={{ padding: "0 1em" }}>
-                                    <input type="checkbox" checked={t.isRemoved ? false : true} id={`check_${t.Id}`} value={t.Id} onClick={e => handleSelectChange(e)} style={{ marginRight: "0.25em" }} />
-                                    <label htmlFor={`check_${t.Id}`}>{t.Taxcode}</label>
-                                </span>
-                            </>
-                        }) :
-                            taxcodes && taxcodes.length > 0 ? taxcodes.map(t => {
-                                return <>
-                                    <span key={t.Id} style={{ padding: "0 1em" }}>
-                                        <input type="checkbox" checked={t.isRemoved ? false : true} id={`check_${t.Id}`} value={t.Id} onClick={e => handleSelectChange(e)} style={{ marginRight: "0.25em" }} />
-                                        <label htmlFor={`check_${t.Id}`}>{t.Taxcode}</label>
-                                    </span>
-                                </>
-                            })
-                                : <div className="text-center">Không tìm thấy dữ liệu</div>}
-                    </form>
-                </div>
+                <form className="w-100" onSubmit={e => handleSubmit(e, 2)}>
+                    <div className="card-body d-flex">
+                        <ListTaxcodes
+                            taxcodes={searchtaxcodes && searchtaxcodes.length > 0 ? searchtaxcodes : []}
+                            callback={handleSelectChange}
+                        />
+                    </div>
+                    <div className="card-footer">
+                        <button className="btn btn-primary">Xuất báo cáo</button>
+                    </div>
+                </form>
             </div>
         </>
     )
 }
+
+const ListTaxcodes = ({ taxcodes, callback }) => {
+    return (
+        <>
+            {
+                taxcodes && taxcodes.length > 0 ? taxcodes.map(t => {
+                    return <>
+                        <span key={t.Id} style={{ padding: "0 1em" }}>
+                            <input type="checkbox" checked={t.isRemoved ? false : true} id={`check_${t.Id}`} value={t.Id} onClick={e => callback(e)} style={{ marginRight: "0.25em" }} />
+                            <label htmlFor={`check_${t.Id}`}>{t.Taxcode}</label>
+                        </span>
+                    </>
+                })
+                    : <div className="text-center">Không tìm thấy dữ liệu</div>
+            }
+        </>
+    )
+}
+
 
 export const getServerSideProps = async () => {
     return {
