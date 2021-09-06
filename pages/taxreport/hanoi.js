@@ -103,6 +103,31 @@ function Hanoi() {
             console.log(e);
         }
     }
+    const handleFormSubmit = async (e, type) => {
+        try {
+            e.preventDefault();
+            if (User.UserType !== 1 && !query.taxcode) {
+                alert("Vui lòng nhập mã số thuế");
+                return false;
+            }
+            if (!query.fromdate || !query.todate) {
+                alert("Ngày không hợp lệ");
+                return false;
+            }
+            query.type = type;
+            query.customers = searchtaxcodes;
+            var data = await Post('taxreport', { params: query });
+            if (data.error) {
+                alert(data.error);
+                return false;
+            }
+            setTaxcodes(data || []);
+            setSearchtaxcodes(data || []);
+        }
+        catch (e) {
+            console.log(e);
+        }
+    }
 
     return (
         <>
@@ -169,7 +194,7 @@ function Hanoi() {
                 <div className="card-header d-flex justify-content-end">
                     <label><input type="search" onChange={handleSearch} value={taxcode} className="form-controll" />&nbsp;Tìm <i className="fa fa-search"></i></label>
                 </div>
-                <form className="w-100" onSubmit={e => handleSubmit(e, 2)}>
+                <form className="w-100" onSubmit={e => handleFormSubmit(e, 2)}>
                     <div className="card-body d-flex">
                         <ListTaxcodes
                             taxcodes={searchtaxcodes && searchtaxcodes.length > 0 ? searchtaxcodes : []}

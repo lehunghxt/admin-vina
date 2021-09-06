@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = Handler;
 
-var _ReportController = require("../../Controller/ReportController");
+var _ReportController = require("../../../Controller/ReportController");
 
 var _ZipHelper = require("@Helper/ZipHelper");
 

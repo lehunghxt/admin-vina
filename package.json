@@ -10,8 +10,10 @@
     "hung": "next build && nodemon server.js"
   },
   "dependencies": {
+    "archiver": "^5.3.0",
     "axios": "^0.21.1",
     "crypto-js": "^4.1.1",
+    "exceljs": "^4.3.0",
     "express": "^4.17.1",
     "express-redirect-loop": "^1.0.0",
     "express-session": "^1.17.2",

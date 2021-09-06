@@ -1,4 +1,4 @@
-const { DataTypes } = require('sequelize');
+const { DataTypes } = require('sequelize-v5');
 
 module.exports = sequelize => {
   const attributes = {

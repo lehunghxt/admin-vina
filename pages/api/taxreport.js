@@ -40,18 +40,20 @@ async function Get(req, res, next) {
 
 async function Post(req, res, next) {
     try {
-        const { customers, fromdate, todate, type } = req.body;
+        const { customers, fromdate, todate, type } = req.body.params;
         await ExportHaNoiData(customers, fromdate, todate, type)
-        var path = `/ExportExcel/${d.getDate().toString().padStart(2, '0')}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getFullYear()}`
-        await ZipFolder(path, path);
-        var filePath = path.join(__dirname + path + '.zip');
-        var stat = fs.statSync(filePath);
-        res.writeHead(200, {
-            'Content-Type': 'application/zip',
-            'Content-Length': stat.size
-        });
-        var readStream = fs.createReadStream(filePath);
-        readStream.pipe(res);
+        // const d = new Date();
+        // console.log(d);
+        // var path = `/ExportExcel/${d.getDate().toString().padStart(2, '0')}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getFullYear()}`
+        // await ZipFolder(path, path);
+        // var filePath = path.join(__dirname + path + '.zip');
+        // var stat = fs.statSync(filePath);
+        // res.writeHead(200, {
+        //     'Content-Type': 'application/zip',
+        //     'Content-Length': stat.size
+        // });
+        // var readStream = fs.createReadStream(filePath);
+        // readStream.pipe(res);
     } catch (error) {
         console.log(error)
         res.status(500).send();
