@@ -19,10 +19,14 @@ const sequelize = new Sequelize({
         timestamps: false
     },
     dialectOptions: {
+        supportBigNumbers: true,
+        bigNumberStrings: true,
         options: {
             encrypt: false
         },
-    }, operatorsAliases: {
+    },
+    query: { raw: true },
+    operatorsAliases: {
         $and: Op.and,
         $or: Op.or,
         $eq: Op.eq,

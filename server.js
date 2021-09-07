@@ -11,7 +11,6 @@ const handle = nextApp.getRequestHandler();
 const session = require("express-session");
 const redirectLoop = require("express-redirect-loop");
 const lib = require("./Helper/FileHelper");
-
 app.use(
   session({
     secret: "secret",
@@ -26,6 +25,7 @@ app.use(
   })
 );
 
+global.__basedir = __dirname;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());

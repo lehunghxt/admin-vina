@@ -3,7 +3,7 @@ const CryptoJS = require("crypto-js");
 
 module.exports.CheckLogin = async function (username, password) {
   var passHash = CryptoJS.MD5(username + password).toString();
-  var user = (await UserModal.LoginUser(username, password)).dataValues;
+  var user = (await UserModal.LoginUser(username, password));
   if (!user || user.Password !== passHash || user.UserType !== 1) return null;
   return user;
 };
