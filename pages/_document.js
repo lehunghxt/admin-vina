@@ -7,7 +7,7 @@ export default class MyDocument extends Document {
         <Head>
         </Head>
         <body id="page-top">
-          <Main />
+          <Main style={{position:"relative"}}/>
           <NextScript />
         </body>
       </Html>

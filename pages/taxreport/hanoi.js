@@ -2,7 +2,11 @@ import { Get, Post } from '@Helper/ApiHelper'
 import { useCallback, useState } from 'react'
 import { useUser } from 'Provider/UserProvider'
 
+import { useLoading } from '../../context/loading';
+
 function Hanoi() {
+    const { show, hide } = useLoading();
+
     const { User } = useUser();
     const [query, setQuery] = useState({ provinceid: '03' })
     const [taxcodes, setTaxcodes] = useState([])
@@ -82,6 +86,7 @@ function Hanoi() {
     const handleSubmit = async (e, type) => {
         try {
             e.preventDefault();
+            show();
             if (User.UserType !== 1 && !query.taxcode) {
                 alert("Vui lòng nhập mã số thuế");
                 return false;
@@ -98,14 +103,17 @@ function Hanoi() {
             }
             setTaxcodes(data || []);
             setSearchtaxcodes(data || []);
+            hide();
         }
         catch (e) {
             console.log(e);
+            hide();
         }
     }
     const handleFormSubmit = async (e, type) => {
         try {
             e.preventDefault();
+            show();
             if (User.UserType !== 1 && !query.taxcode) {
                 alert("Vui lòng nhập mã số thuế");
                 return false;
@@ -127,9 +135,11 @@ function Hanoi() {
             link.setAttribute('download', 'file.zip');
             document.body.appendChild(link);
             link.click();
+            hide();
         }
         catch (e) {
             console.log(e);
+            hide();
         }
     }
 

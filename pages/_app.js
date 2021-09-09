@@ -1,23 +1,27 @@
-import '../styles/globals.css'
+import "../styles/globals.css";
 import { useRouter } from "next/router";
-import '../public/asset/vendor/fontawesome-free/css/all.min.css'
-import '../public/asset/css/sb-admin-2.min.css'
-import Layout from '../component/Layout'
-import UserProvider from '../Provider/UserProvider'
+import "../public/asset/vendor/fontawesome-free/css/all.min.css";
+import "../public/asset/css/sb-admin-2.min.css";
+import Layout from "../component/Layout";
+import UserProvider from "../Provider/UserProvider";
+import LoadingProvider from "../Provider/LoadingProvider";
 
 
 function MyApp({ Component, pageProps, User }) {
   const router = useRouter();
-  return router.pathname == '/auth' ?
-    (<Component {...pageProps} />)
-    :
-    (<>
-      <UserProvider User={User}>
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
-      </UserProvider>
-    </>)
+  return router.pathname == "/auth" ? (
+    <Component {...pageProps} />
+  ) : (
+    <>
+      <LoadingProvider>
+        <UserProvider User={User}>
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        </UserProvider>
+      </LoadingProvider>
+    </>
+  );
 }
 
 MyApp.getInitialProps = async ({ Component, ctx }) => {
@@ -40,5 +44,4 @@ MyApp.getInitialProps = async ({ Component, ctx }) => {
   return { pageProps };
 };
 
-
-export default MyApp
+export default MyApp;
