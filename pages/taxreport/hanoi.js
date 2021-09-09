@@ -116,13 +116,17 @@ function Hanoi() {
             }
             query.type = type;
             query.customers = searchtaxcodes;
-            var data = await Post('taxreport', { params: query });
+            var data = await Post('taxreport', { params: query, responseType: 'blob' });
             if (data.error) {
                 alert(data.error);
                 return false;
             }
-            setTaxcodes(data || []);
-            setSearchtaxcodes(data || []);
+            const url = data.file;
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'file.zip');
+            document.body.appendChild(link);
+            link.click();
         }
         catch (e) {
             console.log(e);

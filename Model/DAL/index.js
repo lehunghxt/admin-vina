@@ -2,6 +2,7 @@ const Sequelize = require('sequelize-v5');
 Sequelize.DATE.prototype._stringify = function _stringify(date, options) {
     return this._applyTimezone(new Date(date), options).format('YYYY-MM-DD HH:mm:ss.SSS');
 };
+import { WriteFile } from '@Helper/FileHelper';
 const Op = Sequelize.Op
 const sequelize = new Sequelize({
     database: "EISV2",
@@ -35,11 +36,12 @@ const sequelize = new Sequelize({
         $lte: Op.lte,
         $gte: Op.gte,
         $like: Op.like,
-        $in: Op.in
+        $in: Op.in,
+        $not: Op.not
     },
     logging: console.log,
     logging: function (str) {
-        console.log(str)
+        WriteFile('text.txt', str);
     }
 });
 

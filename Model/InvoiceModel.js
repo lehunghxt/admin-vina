@@ -2,9 +2,12 @@ const { connect, Request } = require('mssql');
 const Sequelize = require('sequelize-v5')
 const sequelize = require('./DAL/index').sequelize;
 const _InvoiceModel = require('./DAL/tblIvoice');
-const Op = Sequelize.Op;
+const _AdjustedInvoiceModel = require('./DAL/tblAdjustedInvoice');
+const _InvoiceReplaceModel = require('./DAL/tblInvoiceReplace');
 
-var InvoiceModel = _InvoiceModel(sequelize);
+const InvoiceModel = _InvoiceModel(sequelize);
+const AdjustedInvoiceModel = _AdjustedInvoiceModel(sequelize);
+const ReplaceInvoiceModel = _InvoiceReplaceModel(sequelize);
 
 const config = {
     encrypt: false,
@@ -14,11 +17,13 @@ const config = {
     database: "EISV2",
 };
 
-export const GetInvoicesByIds = async (Ids, CustomerId) => {
-    const pool = await connect(config);
-    var request = new Request(pool);
-    const query = `SELECT * FROM tblivoice WHERE CustomerId = ${CustomerId} AND Id IN (${Ids.join(',')})`;
-    return (await request.query(query)).recordset;
+export const GetInvoicesByIds = async (Ids, customerId) => {
+    return await InvoiceModel.findAll({
+        $and: [{
+            CustomerId: customerId,
+            Id: Ids
+        }]
+    })
 }
 
 export const GetInvoiceCode = async () => {
@@ -42,6 +47,7 @@ export const GetInvoiceCode = async () => {
 
 export const VoidNotSignedInvoices = async (invoices, customerId) => {
     var transaction;
+    console.log(invoices)
     try {
         await sequelize.transaction({ autocommit: false }).then(async t => {
             transaction = t;
@@ -62,16 +68,26 @@ export const VoidNotSignedInvoices = async (invoices, customerId) => {
     }
 }
 
-export const GetAdjustedLinks = async (Ids) => {
-    const pool = await connect(config);
-    const request = new Request(pool);
-    const query = `SELECT * FROM tblAdjustedInvoice WHERE InvoiceId IN (${Ids.join(',')}) OR AdjustedInvoiceId IN (${Ids.join(',')})`;
-    return (await request.query(query)).recordset;
+export const GetAdjustedLinks = async (Ids, customerId) => {
+    return await AdjustedInvoiceModel.findAll({
+        $and: [{
+            CustomerId: customerId,
+            $not: [{ Status: 3 }],
+            $or: [{ InvoiceId: Ids }, { AdjustedInvoiceId: Ids }]
+        }]
+    })
 }
 
-export const GetReplacedLinks = async (Ids) => {
-    const pool = await connect(config);
-    const request = new Request(pool);
-    const query = `SELECT * FROM tblInvoiceReplace WHERE InvoiceId IN (${Ids.join(',')}) OR ReplaceInvoiceId IN (${Ids.join(',')})`;
-    return (await request.query(query)).recordset;
+export const GetReplacedLinks = async (Ids, customerId) => {
+    // const pool = await connect(config);
+    // const request = new Request(pool);
+    // const query = `SELECT * FROM tblInvoiceReplace WHERE InvoiceId IN (${Ids.join(',')}) OR ReplaceInvoiceId IN (${Ids.join(',')})`;
+    // return (await request.query(query)).recordset;
+    return await ReplaceInvoiceModel.findAll({
+        $and: [{
+            CustomerId: customerId,
+            $not: [{ Status: 3 }],
+            $or: [{ InvoiceId: Ids }, { ReplaceInvoiceId: Ids }]
+        }]
+    })
 }
