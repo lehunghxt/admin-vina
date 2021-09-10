@@ -1,23 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import PropTypes from "prop-types";
-import { LoadingContext } from "../context/loading";
-import Image from "next/image";
-import loading from "../public/asset/img/loading.gif";
-function Loading() {
-  return (
-    <>
-      <div style={{ width: "100%", height: "100%", position: "absolute", backgroundColor: "transparent",zIndex: "100" }}>
-            <Image
-            alt="Mountains"
-            src={loading}
-            layout="fill"
-            objectFit="none"
-            style={{width:"200px", height:"auto"}}
-            />
-      </div>
-    </>
-  );
-}
+import Loading from '../component/Loading';
+
+export const LoadingContext = React.createContext();
+export const useLoading = () => useContext(LoadingContext);
+
 export default function LoadingProvider(props) {
   const [loading, setLoading] = useState(false);
   return (
