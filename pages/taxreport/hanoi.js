@@ -8,7 +8,7 @@ function Hanoi() {
     const { show, hide } = useLoading();
 
     const { User } = useUser();
-    const [query, setQuery] = useState({ provinceid: '03' })
+    const [query, setQuery] = useState({ provinceid: '01' })
     const [taxcodes, setTaxcodes] = useState([])
     const [searchtaxcodes, setSearchtaxcodes] = useState([])
     const [taxcode, setTaxcode] = useState('')
@@ -209,11 +209,13 @@ function Hanoi() {
                     <label><input type="search" onChange={handleSearch} value={taxcode} className="form-controll" />&nbsp;Tìm <i className="fa fa-search"></i></label>
                 </div>
                 <form className="w-100" onSubmit={e => handleFormSubmit(e, 2)}>
-                    <div className="card-body d-flex">
-                        <ListTaxcodes
-                            taxcodes={searchtaxcodes && searchtaxcodes.length > 0 ? searchtaxcodes : []}
-                            callback={handleSelectChange}
-                        />
+                    <div className="card-body">
+                        <div className="list-taxcodes">
+                            <ListTaxcodes
+                                taxcodes={searchtaxcodes && searchtaxcodes.length > 0 ? searchtaxcodes : []}
+                                callback={handleSelectChange}
+                            />
+                        </div>
                     </div>
                     <div className="card-footer">
                         <button className="btn btn-primary">Xuất báo cáo</button>
@@ -230,7 +232,7 @@ const ListTaxcodes = ({ taxcodes, callback }) => {
             {
                 taxcodes && taxcodes.length > 0 ? taxcodes.map(t => {
                     return <>
-                        <span key={t.Id} style={{ padding: "0 1em" }}>
+                        <span key={t.Id} className={t.type == 1 ? "text-primary" : t.type == 2 ? "text-warning" : "text-danger"}>
                             <input type="checkbox" checked={t.isRemoved ? false : true} id={`check_${t.Id}`} value={t.Id} onClick={e => callback(e)} style={{ marginRight: "0.25em" }} />
                             <label htmlFor={`check_${t.Id}`}>{t.Taxcode}</label>
                         </span>

@@ -18,3 +18,8 @@ a {
 i.nav-link {
   cursor: pointer;
 }
+
+.list-taxcodes{
+  display: grid;
+  grid-template-columns: auto auto auto auto auto auto auto;
+}

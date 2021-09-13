@@ -2,6 +2,7 @@ import { GetInvoiceCode, VoidNotSignedInvoices, GetInvoicesByIds, GetAdjustedLin
 import { CreateFolder } from '@Helper/FileHelper'
 const Excel = require("exceljs");
 const sequelize = require("../Model/DAL/").sequelize;
+const sequelizeEHD = require("../Model/DAL/").sequelizeEHD;
 const _CustomerModel = require("../Model/DAL/tblCustomer");
 const _InvoiceModel = require("../Model/DAL/tblIvoice");
 const _InvoiceDetailModel = require("../Model/DAL/tblIvoiceDetail");
@@ -9,6 +10,9 @@ const _InvoiceDetailModel = require("../Model/DAL/tblIvoiceDetail");
 const CustomerModel = _CustomerModel(sequelize);
 const InvoiceModel = _InvoiceModel(sequelize);
 const InvoiceDetailModel = _InvoiceDetailModel(sequelize);
+const CustomerModelEHD = _CustomerModel(sequelizeEHD);
+const InvoiceModelEHD = _InvoiceModel(sequelizeEHD);
+const InvoiceDetailModelEHD = _InvoiceDetailModel(sequelizeEHD);
 const { DOMParser } = require('xmldom')
 
 export const PrepareTaxCode = async (ProvinceId, FromDate, ToDate) => {
@@ -56,7 +60,58 @@ export const PrepareTaxCode = async (ProvinceId, FromDate, ToDate) => {
       ProvinceId
     }
   })
-  return data;
+
+  CustomerModelEHD.hasMany(InvoiceModelEHD, { foreignKey: 'CustomerId' })
+  InvoiceModelEHD.belongsTo(CustomerModelEHD, { foreignKey: 'CustomerId' })
+  var dataEHD = await CustomerModelEHD.findAll({
+    attributes: [sequelize.fn('DISTINCT', sequelize.col('CustomerModel.Id')), "Taxcode", "IsKeepInvocie"],
+    include: [{
+      model: InvoiceModelEHD,
+      required: true,
+      attributes: [],
+      raw: true,
+      where: {
+        $or: [
+          {
+            $and: [{ CreateDate: { $gte: FromDate } }, {
+              CreateDate: { $lte: ToDate }
+            }]
+          },
+          {
+            $and: [{ ModifiedDate: { $gte: FromDate } }, {
+              ModifiedDate: { $lte: ToDate }
+            }]
+          },
+          {
+            $and: [{ DateofInvoice: { $gte: FromDate } }, {
+              DateofInvoice: { $lte: ToDate }
+            }]
+          },
+          {
+            $and: [{ DateofSign: { $gte: FromDate } }, {
+              DateofSign: { $lte: ToDate }
+            }]
+          },
+          {
+            $and: [{ ConvertDate: { $gte: FromDate } }, {
+              ConvertDate: { $lte: ToDate }
+            }]
+          },
+        ]
+      },
+    }],
+    raw: true,
+    where: {
+      ProvinceId
+    }
+  })
+  var result = [...data, ...dataEHD];
+  var hdTaxcodes = data.map(e => e.Taxcode);
+  var ehdTaxcodes = dataEHD.map(e => e.Taxcode);
+  result = [...new Map(result.map(item => [item["Taxcode"], item])).values()];
+  result = result.map(e => hdTaxcodes.includes(e.Taxcode) && ehdTaxcodes.includes(e.Taxcode) ? ({ ...e, type: 3 }) : hdTaxcodes.includes(e.Taxcode) ? ({ ...e, type: 2 }) : ({ ...e, type: 1 }));
+  result.sort((a, b) => (a.type > b.type) ? -1 : 0)
+  return result
 }
 
 const GetAccessedInvoices = async (CustomerId, FromDate, ToDate) => {

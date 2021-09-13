@@ -910,78 +910,78 @@ module.exports = sequelize => {
       comment: null,
       field: "Type"
     },
-    DiscountAmountNoTax: {
-      type: DataTypes.DECIMAL,
-      allowNull: true,
-      defaultValue: null,
-      primaryKey: false,
-      autoIncrement: false,
-      comment: null,
-      field: "DiscountAmountNoTax"
-    },
-    DiscountAmountNoTaxAfter: {
-      type: DataTypes.DECIMAL,
-      allowNull: true,
-      defaultValue: null,
-      primaryKey: false,
-      autoIncrement: false,
-      comment: null,
-      field: "DiscountAmountNoTaxAfter"
-    },
-    DiscountAmountTax0: {
-      type: DataTypes.DECIMAL,
-      allowNull: true,
-      defaultValue: null,
-      primaryKey: false,
-      autoIncrement: false,
-      comment: null,
-      field: "DiscountAmountTax0"
-    },
-    DiscountAmountTax0After: {
-      type: DataTypes.DECIMAL,
-      allowNull: true,
-      defaultValue: null,
-      primaryKey: false,
-      autoIncrement: false,
-      comment: null,
-      field: "DiscountAmountTax0After"
-    },
-    DiscountAmountTax5: {
-      type: DataTypes.DECIMAL,
-      allowNull: true,
-      defaultValue: null,
-      primaryKey: false,
-      autoIncrement: false,
-      comment: null,
-      field: "DiscountAmountTax5"
-    },
-    DiscountAmountTax5After: {
-      type: DataTypes.DECIMAL,
-      allowNull: true,
-      defaultValue: null,
-      primaryKey: false,
-      autoIncrement: false,
-      comment: null,
-      field: "DiscountAmountTax5After"
-    },
-    DiscountAmountTax10: {
-      type: DataTypes.DECIMAL,
-      allowNull: true,
-      defaultValue: null,
-      primaryKey: false,
-      autoIncrement: false,
-      comment: null,
-      field: "DiscountAmountTax10"
-    },
-    DiscountAmountTax10After: {
-      type: DataTypes.DECIMAL,
-      allowNull: true,
-      defaultValue: null,
-      primaryKey: false,
-      autoIncrement: false,
-      comment: null,
-      field: "DiscountAmountTax10After"
-    }
+    //   DiscountAmountNoTax: {
+    //     type: DataTypes.DECIMAL,
+    //     allowNull: true,
+    //     defaultValue: null,
+    //     primaryKey: false,
+    //     autoIncrement: false,
+    //     comment: null,
+    //     field: "DiscountAmountNoTax"
+    //   },
+    //   DiscountAmountNoTaxAfter: {
+    //     type: DataTypes.DECIMAL,
+    //     allowNull: true,
+    //     defaultValue: null,
+    //     primaryKey: false,
+    //     autoIncrement: false,
+    //     comment: null,
+    //     field: "DiscountAmountNoTaxAfter"
+    //   },
+    //   DiscountAmountTax0: {
+    //     type: DataTypes.DECIMAL,
+    //     allowNull: true,
+    //     defaultValue: null,
+    //     primaryKey: false,
+    //     autoIncrement: false,
+    //     comment: null,
+    //     field: "DiscountAmountTax0"
+    //   },
+    //   DiscountAmountTax0After: {
+    //     type: DataTypes.DECIMAL,
+    //     allowNull: true,
+    //     defaultValue: null,
+    //     primaryKey: false,
+    //     autoIncrement: false,
+    //     comment: null,
+    //     field: "DiscountAmountTax0After"
+    //   },
+    //   DiscountAmountTax5: {
+    //     type: DataTypes.DECIMAL,
+    //     allowNull: true,
+    //     defaultValue: null,
+    //     primaryKey: false,
+    //     autoIncrement: false,
+    //     comment: null,
+    //     field: "DiscountAmountTax5"
+    //   },
+    //   DiscountAmountTax5After: {
+    //     type: DataTypes.DECIMAL,
+    //     allowNull: true,
+    //     defaultValue: null,
+    //     primaryKey: false,
+    //     autoIncrement: false,
+    //     comment: null,
+    //     field: "DiscountAmountTax5After"
+    //   },
+    //   DiscountAmountTax10: {
+    //     type: DataTypes.DECIMAL,
+    //     allowNull: true,
+    //     defaultValue: null,
+    //     primaryKey: false,
+    //     autoIncrement: false,
+    //     comment: null,
+    //     field: "DiscountAmountTax10"
+    //   },
+    //   DiscountAmountTax10After: {
+    //     type: DataTypes.DECIMAL,
+    //     allowNull: true,
+    //     defaultValue: null,
+    //     primaryKey: false,
+    //     autoIncrement: false,
+    //     comment: null,
+    //     field: "DiscountAmountTax10After"
+    //   }
   };
   const options = {
     sequelize,
