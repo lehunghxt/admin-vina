@@ -1,6 +1,5 @@
 import { PrepareTaxCode, ExportHaNoiData } from '../../Controller/ReportController';
 import { ZipFolder } from '@Helper/ZipHelper'
-import { createReadStream } from 'fs';
 
 export default function Handler(req, res, next) {
     switch (req.method) {
@@ -27,7 +26,6 @@ export default function Handler(req, res, next) {
 async function Get(req, res, next) {
     try {
         const { provinceid, fromdate, todate } = req.query;
-        console.log(req.query)
         if (req.session.User.UserType !== 1 && provinceid !== req.session.User.Ipconfig)
             res.json({ error: "Mã số thuế này không thuộc khu vực quản lý!" })
         var taxcodes = await PrepareTaxCode(provinceid, fromdate, todate);

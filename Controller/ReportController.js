@@ -6,6 +6,8 @@ const sequelizeEHD = require("../Model/DAL/").sequelizeEHD;
 const _CustomerModel = require("../Model/DAL/tblCustomer");
 const _InvoiceModel = require("../Model/DAL/tblIvoice");
 const _InvoiceDetailModel = require("../Model/DAL/tblIvoiceDetail");
+const _NoticeissuedModel = require("../Model/DAL/tblNoticeissued");
+const _IvoiceTemptModel = require("../Model/DAL/tblIvoiceTempt");
 
 const CustomerModel = _CustomerModel(sequelize);
 const InvoiceModel = _InvoiceModel(sequelize);
@@ -13,6 +15,8 @@ const InvoiceDetailModel = _InvoiceDetailModel(sequelize);
 const CustomerModelEHD = _CustomerModel(sequelizeEHD);
 const InvoiceModelEHD = _InvoiceModel(sequelizeEHD);
 const InvoiceDetailModelEHD = _InvoiceDetailModel(sequelizeEHD);
+const NoticeissuedModelEHD = _NoticeissuedModel(sequelizeEHD);
+const IvoiceTemptModelEHD = _IvoiceTemptModel(sequelizeEHD)
 const { DOMParser } = require('xmldom')
 
 export const PrepareTaxCode = async (ProvinceId, FromDate, ToDate) => {
@@ -111,11 +115,11 @@ export const PrepareTaxCode = async (ProvinceId, FromDate, ToDate) => {
   result = [...new Map(result.map(item => [item["Taxcode"], item])).values()];
   result = result.map(e => hdTaxcodes.includes(e.Taxcode) && ehdTaxcodes.includes(e.Taxcode) ? ({ ...e, type: 3 }) : hdTaxcodes.includes(e.Taxcode) ? ({ ...e, type: 2 }) : ({ ...e, type: 1 }));
   result.sort((a, b) => (a.type > b.type) ? -1 : 0)
-  return result
+  return result.map(e => ({ ...e, IsKeepInvocie: parseInt(e.IsKeepInvocie) }));
 }
 
-const GetAccessedInvoices = async (CustomerId, FromDate, ToDate) => {
-  return await InvoiceModel.findAll({
+const GetAccessedInvoices = async (CustomerId, FromDate, ToDate, Type) => {
+  var query = {
     where: {
       CustomerId,
       $or: [
@@ -150,21 +154,48 @@ const GetAccessedInvoices = async (CustomerId, FromDate, ToDate) => {
       ['NoticeissuedId', 'ASC'],
       ['InvoiceNumber', 'DESC'],
     ],
-  });
+  }
+  if (Type === 2 || Type === 3)
+    return await InvoiceModel.findAll(query);
+  else {
+    var data = await InvoiceModelEHD.findAll(query);
+    const NoticeIds = [...new Set(data.map(i => parseInt(i.NoticeissuedId)))];
+    const Notices = await NoticeissuedModelEHD.findAll({
+      where: {
+        Id: NoticeIds
+      }
+    })
+    const IvoiceTemptIds = [...new Set(Notices.map(i => parseInt(i.IvoiceTemptId)))];
+    const Tempts = await IvoiceTemptModelEHD.findAll({
+      where: {
+        Id: IvoiceTemptIds
+      }
+    });
+    data = data.map(e => {
+      var notice = Notices.find(n => n.Id === e.NoticeissuedId);
+      var tempt = Tempts.find(t => t.Id === notice.IvoiceTemptId);
+      e.TemptCode = tempt.TemptCode;
+      e.Symbol = notice.Symbol;
+      return e;
+    })
+    return data;
+  }
 }
 
 export const ExportHaNoiData = async (Customers, FromDate, ToDate, Type) => {
   try {
     for (let index = 0; index < Customers.length; index++) {
       const customer = Customers[index];
-      var invoices = await GetAccessedInvoices(customer.Id, FromDate, ToDate);
-      const invoiceIds = invoices.map(e => parseInt(e.Id));
+      var invoices = await GetAccessedInvoices(customer.Id, FromDate, ToDate, customer.type);
+      var invoiceIds = invoices.map(e => parseInt(e.Id));
       const NoticeIds = [...new Set(invoices.map(i => parseInt(i.NoticeissuedId)))];
       for (var i = 0; i < NoticeIds.length; i++) {
         var InvoicesByNotice = invoices.filter(e => e.NoticeissuedId == NoticeIds[i]);
         if (InvoicesByNotice.length < 1) continue;
         if (InvoicesByNotice.every(e => e.Status === 1)) {
+          var removeInvoiceIds = invoices.filter(e => e.NoticeissuedId == NoticeIds[i]).map(e => parseInt(e.Id));
           invoices = invoices.filter(e => e.NoticeissuedId !== NoticeIds[i]);
+          invoiceIds = invoiceIds.filter(e => !removeInvoiceIds.includes(e))
           continue;
         }
         if (customer.IsKeepInvocie && parseInt(customer.IsKeepInvocie) == 1) {
@@ -199,7 +230,7 @@ export const ExportHaNoiData = async (Customers, FromDate, ToDate, Type) => {
           var MissingInvoices = await GetInvoicesByIds(MissingInvoiceIds, customer.Id);
           var listAdjusted = listProcess.filter(e => e.Status === 3);
           if (listAdjusted.length > 0) {
-            var listAdjustedLinks = await GetAdjustedLinks(processedIds, customer.Id);
+            var listAdjustedLinks = await GetAdjustedLinks(processedIds, customer.Id, customer.type);
             listAdjustedLinks.forEach(adj => {
               var processed = invoices.find(e => e.Id == adj.InvoiceId);
               var process = invoices.find(e => e.Id == adj.AdjustedInvoiceId);
@@ -219,7 +250,7 @@ export const ExportHaNoiData = async (Customers, FromDate, ToDate, Type) => {
 
           var listReplaced = listProcess.filter(e => e.Status === 6);
           if (listReplaced.length > 0) {
-            var listReplacedLinks = await GetReplacedLinks(processedIds, customer.Id);
+            var listReplacedLinks = await GetReplacedLinks(processedIds, customer.Id, customer.type);
             listReplacedLinks.forEach(rep => {
               var process = invoices.find(e => e.Id == rep.ReplaceInvoiceId);
               var processed = invoices.find(e => e.Id == rep.InvoiceId);
@@ -238,10 +269,12 @@ export const ExportHaNoiData = async (Customers, FromDate, ToDate, Type) => {
           }
         }
       }
+      if (!invoices || invoices.length < 1) continue;
       invoices = MapToTaxHaNoiData(invoices);
-      var details = await GetTaxReportDetail(invoices, invoiceIds);
+      var details = await GetTaxReportDetail(invoices, invoiceIds, customer.type);
       ExportExcel(customer.Taxcode, invoices, details, Type);
     };
+    return;
   } catch (error) {
     throw error;
   }
@@ -249,7 +282,9 @@ export const ExportHaNoiData = async (Customers, FromDate, ToDate, Type) => {
 
 const MapToTaxHaNoiData = (invoices) => {
   var result = [];
-  invoices.forEach(invoice => {
+  //invoices.forEach(invoice => {
+  for (let index = 0; index < invoices.length; index++) {
+    let invoice = invoices[index];
     if (invoice.Status == 5) invoice.Status = 1;
     else if (invoice.Status == 6 && invoice.IsChange != null && invoice.IsChange == 1) invoice.Status = 2;
     else if (invoice.Status == 3 && invoice.IsAdjusted != null && invoice.IsAdjusted == 1) invoice.Status = 3;
@@ -282,16 +317,25 @@ const MapToTaxHaNoiData = (invoices) => {
       invoice.BuyerCertificate = "";
     }
     result.push(invoice)
-  })
+  }
   return result;
 }
 
-const GetTaxReportDetail = async (invoices, invoiceIds) => {
+const GetTaxReportDetail = async (invoices, invoiceIds, Type) => {
   invoiceIds = SplitArray(invoiceIds, 1000);
   var details = [];
   var result = [];
-  for (let i = 0; i < invoiceIds.length; i++) {
-    var detailpart = await InvoiceDetailModel.findAll({
+  if (Type === 2 || Type === 3)
+    for (let i = 0; i < invoiceIds.length; i++) {
+      var detailpart = await InvoiceDetailModel.findAll({
+        where: {
+          IvoiceId: invoiceIds[i]
+        }
+      });
+      details = [...details, ...detailpart];
+    }
+  else for (let i = 0; i < invoiceIds.length; i++) {
+    var detailpart = await InvoiceDetailModelEHD.findAll({
       where: {
         IvoiceId: invoiceIds[i]
       }
@@ -557,6 +601,7 @@ const ExportExcel = async (taxcode, invoices, details, type) => {
     //WriteFile
     workbook.xlsx.writeFile(__basedir + `/public/ExportExcel/${dirpath}/${taxcode}.xlsx`);
   }
+  return;
 }
 
 const GetCerBetween2String = (str) => {

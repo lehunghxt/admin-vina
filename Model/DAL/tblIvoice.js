@@ -901,15 +901,15 @@ module.exports = sequelize => {
       comment: null,
       field: "CancleDate"
     },
-    Type: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: "((1))",
-      primaryKey: false,
-      autoIncrement: false,
-      comment: null,
-      field: "Type"
-    },
+    // Type: {
+    //   type: DataTypes.INTEGER,
+    //   allowNull: false,
+    //   defaultValue: "((1))",
+    //   primaryKey: false,
+    //   autoIncrement: false,
+    //   comment: null,
+    //   field: "Type"
+    // },
     //   DiscountAmountNoTax: {
     //     type: DataTypes.DECIMAL,
     //     allowNull: true,
