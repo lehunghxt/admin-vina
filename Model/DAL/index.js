@@ -5,10 +5,10 @@ Sequelize.DATE.prototype._stringify = function _stringify(date, options) {
 import { WriteFile } from '@Helper/FileHelper';
 const Op = Sequelize.Op
 const sequelize = new Sequelize({
-    database: "HDDT",
+    database: "EISV2",
     username: "sa",
-    password: "VinaCA@123!@#",
-    host: '192.168.10.2',
+    password: "SqlAsap@123",
+    host: '10.0.0.51',
     dialect: 'mssql',
     pool: {
         max: 5,

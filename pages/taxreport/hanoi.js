@@ -8,7 +8,7 @@ function Hanoi() {
     const { show, hide } = useLoading();
 
     const { User } = useUser();
-    const [query, setQuery] = useState({ provinceid: '01' })
+    const [query, setQuery] = useState({ provinceid: '03' })
     const [taxcodes, setTaxcodes] = useState([])
     const [searchtaxcodes, setSearchtaxcodes] = useState([])
     const [taxcode, setTaxcode] = useState('')
