@@ -240,7 +240,7 @@ export const ExportHaNoiData = async (Customers, FromDate, ToDate, Type) => {
       }
       invoices = MapToTaxHaNoiData(invoices);
       var details = await GetTaxReportDetail(invoices, invoiceIds);
-      ExportExcel(customer.Taxcode, invoices, details, Type);
+      await ExportExcel(customer.Taxcode, invoices, details, Type);
     };
   } catch (error) {
     throw error;
