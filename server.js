@@ -27,8 +27,8 @@ app.use(
 
 global.__basedir = __dirname;
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // =============================LISTENING SOCKET.IO===============================
 io.on("connection", (socket) => {
   console.log("We have a new connection!!!");

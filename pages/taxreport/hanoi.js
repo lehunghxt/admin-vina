@@ -112,8 +112,8 @@ function Hanoi() {
     }
     const handleFormSubmit = async (e, type) => {
         try {
-            e.preventDefault();
             show();
+            e.preventDefault();
             if (User.UserType !== 1 && !query.taxcode) {
                 alert("Vui lòng nhập mã số thuế");
                 return false;

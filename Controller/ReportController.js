@@ -187,6 +187,7 @@ export const ExportHaNoiData = async (Customers, FromDate, ToDate, Type) => {
     for (let index = 0; index < Customers.length; index++) {
       const customer = Customers[index];
       var invoices = await GetAccessedInvoices(customer.Id, FromDate, ToDate, customer.type);
+      if (!invoices || invoices.length < 1) continue;
       var invoiceIds = invoices.map(e => parseInt(e.Id));
       const NoticeIds = [...new Set(invoices.map(i => parseInt(i.NoticeissuedId)))];
       for (var i = 0; i < NoticeIds.length; i++) {
@@ -198,27 +199,27 @@ export const ExportHaNoiData = async (Customers, FromDate, ToDate, Type) => {
           invoiceIds = invoiceIds.filter(e => !removeInvoiceIds.includes(e))
           continue;
         }
-        if (customer.IsKeepInvocie && parseInt(customer.IsKeepInvocie) == 1) {
-          const lastSignedInvoiceInList = InvoicesByNotice.filter(e => e.Status !== 1).reduce((prev, current) => (prev && prev.InvoiceNumber > current.InvoiceNumber) ? prev : current, null)
-          if (!lastSignedInvoiceInList) continue;
-          const ListNotSigned = InvoicesByNotice.filter(e => e.InvoiceNumber < lastSignedInvoiceInList.InvoiceNumber && e.Status === 1);
-          if (ListNotSigned && ListNotSigned.length > 0) {
-            var ListNeedUpdate = [];
-            ListNotSigned.forEach(async e => {
-              var invoice = invoices.find(i => i.Id == e.Id);
-              if (!({ IvoiceCode } = invoice))
-                invoice.IvoiceCode = await GetInvoiceCode();
-              invoice.Status = 5;
-              invoice.DateofSign = invoice.DateofInvoice;
+        // if (customer.IsKeepInvocie && parseInt(customer.IsKeepInvocie) == 1) {
+        //   const lastSignedInvoiceInList = InvoicesByNotice.filter(e => e.Status !== 1).reduce((prev, current) => (prev && prev.InvoiceNumber > current.InvoiceNumber) ? prev : current, null)
+        //   if (!lastSignedInvoiceInList) continue;
+        //   const ListNotSigned = InvoicesByNotice.filter(e => e.InvoiceNumber < lastSignedInvoiceInList.InvoiceNumber && e.Status === 1);
+        //   if (ListNotSigned && ListNotSigned.length > 0) {
+        //     var ListNeedUpdate = [];
+        //     ListNotSigned.forEach(async e => {
+        //       var invoice = invoices.find(i => i.Id == e.Id);
+        //       if (!({ IvoiceCode } = invoice))
+        //         invoice.IvoiceCode = await GetInvoiceCode();
+        //       invoice.Status = 5;
+        //       invoice.DateofSign = invoice.DateofInvoice;
 
-              ListNeedUpdate.push(invoice);
-              //Update result
-              InvoicesByNotice[InvoicesByNotice.findIndex(e => e.Id == invoice.Id)] = invoice;
-              invoices[invoices.findIndex(e => e.Id == invoice.Id)] = invoice;
-            });
-            await VoidNotSignedInvoices(ListNeedUpdate, customer.Id);
-          }
-        }
+        //       ListNeedUpdate.push(invoice);
+        //       //Update result
+        //       InvoicesByNotice[InvoicesByNotice.findIndex(e => e.Id == invoice.Id)] = invoice;
+        //       invoices[invoices.findIndex(e => e.Id == invoice.Id)] = invoice;
+        //     });
+        //     await VoidNotSignedInvoices(ListNeedUpdate, customer.Id);
+        //   }
+        // }
         InvoicesByNotice = InvoicesByNotice.filter(e => e.Status > 1);
         invoices = InvoicesByNotice.filter(e => e.Status > 1 && e.NoticeissuedId == NoticeIds[i]);
         var listProcess = InvoicesByNotice.filter(e => e.Status === 3 || e.Status === 6);

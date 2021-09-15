@@ -3,7 +3,7 @@ import Link from "next/link"
 function Index() {
     return (
         <>
-            <button type="button" className="btn btn-secondary">
+            <button type="button" className="btn btn-secondary mr-5">
                 <Link href="/taxreport/hanoi" passHref={true}>
                     <i className="link">Báo cáo thuế Hà Nội</i>
                 </Link>
