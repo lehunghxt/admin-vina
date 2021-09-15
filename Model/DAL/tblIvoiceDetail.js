@@ -146,60 +146,60 @@ module.exports = sequelize => {
       comment: null,
       field: "TotalMoneyAfterTax"
     },
-    NoIndex: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: 0,
-      primaryKey: false,
-      autoIncrement: false,
-      comment: null,
-      field: "NoIndex"
-    },
-    Type: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: "((1))",
-      primaryKey: false,
-      autoIncrement: false,
-      comment: "1: bt\r\n2: km\r\n3. ck\r\n4. note",
-      field: "Type"
-    },
-    AdjustedId: {
-      type: DataTypes.BIGINT,
-      allowNull: true,
-      defaultValue: null,
-      primaryKey: false,
-      autoIncrement: false,
-      comment: null,
-      field: "AdjustedId"
-    },
-    DiscountRate: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: "((0))",
-      primaryKey: false,
-      autoIncrement: false,
-      comment: null,
-      field: "DiscountRate"
-    },
-    DiscountAmount: {
-      type: DataTypes.DECIMAL,
-      allowNull: false,
-      defaultValue: "((0))",
-      primaryKey: false,
-      autoIncrement: false,
-      comment: null,
-      field: "DiscountAmount"
-    },
-    PriceAfterDiscount: {
-      type: DataTypes.DECIMAL,
-      allowNull: false,
-      defaultValue: "((0))",
-      primaryKey: false,
-      autoIncrement: false,
-      comment: null,
-      field: "PriceAfterDiscount"
-    }
+    // NoIndex: {
+    //   type: DataTypes.BOOLEAN,
+    //   allowNull: false,
+    //   defaultValue: 0,
+    //   primaryKey: false,
+    //   autoIncrement: false,
+    //   comment: null,
+    //   field: "NoIndex"
+    // },
+    // Type: {
+    //   type: DataTypes.INTEGER,
+    //   allowNull: false,
+    //   defaultValue: "((1))",
+    //   primaryKey: false,
+    //   autoIncrement: false,
+    //   comment: "1: bt\r\n2: km\r\n3. ck\r\n4. note",
+    //   field: "Type"
+    // },
+    // AdjustedId: {
+    //   type: DataTypes.BIGINT,
+    //   allowNull: true,
+    //   defaultValue: null,
+    //   primaryKey: false,
+    //   autoIncrement: false,
+    //   comment: null,
+    //   field: "AdjustedId"
+    // },
+    // DiscountRate: {
+    //   type: DataTypes.INTEGER,
+    //   allowNull: false,
+    //   defaultValue: "((0))",
+    //   primaryKey: false,
+    //   autoIncrement: false,
+    //   comment: null,
+    //   field: "DiscountRate"
+    // },
+    // DiscountAmount: {
+    //   type: DataTypes.DECIMAL,
+    //   allowNull: false,
+    //   defaultValue: "((0))",
+    //   primaryKey: false,
+    //   autoIncrement: false,
+    //   comment: null,
+    //   field: "DiscountAmount"
+    // },
+    // PriceAfterDiscount: {
+    //   type: DataTypes.DECIMAL,
+    //   allowNull: false,
+    //   defaultValue: "((0))",
+    //   primaryKey: false,
+    //   autoIncrement: false,
+    //   comment: null,
+    //   field: "PriceAfterDiscount"
+    // }
   };
   const options = {
     tableName: "tblIvoiceDetail",
