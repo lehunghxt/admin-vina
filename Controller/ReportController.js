@@ -412,7 +412,7 @@ const ExportExcel = async (taxcode, invoices, details, type) => {
       copySheetMaster.addRow(masterrow);
     }
 
-    MasterWorkbook.xlsx.writeFile(__basedir + `/public/ExportExcel/${dirpath}/TaxReportMaster.xlsx`);
+    await MasterWorkbook.xlsx.writeFile(__basedir + `/public/ExportExcel/${dirpath}/TaxReportMaster.xlsx`);
     //#endregion
 
     //#region Detail
@@ -454,7 +454,7 @@ const ExportExcel = async (taxcode, invoices, details, type) => {
     //#endregion
 
     //WriteFile
-    DetailWorkbook.xlsx.writeFile(__basedir + `/public/ExportExcel/${dirpath}/TaxReportDetail.xlsx`);
+    await DetailWorkbook.xlsx.writeFile(__basedir + `/public/ExportExcel/${dirpath}/TaxReportDetail.xlsx`);
   }
   else {
     //#region Hanle Files
@@ -555,7 +555,7 @@ const ExportExcel = async (taxcode, invoices, details, type) => {
     //#endregion
 
     //WriteFile
-    workbook.xlsx.writeFile(__basedir + `/public/ExportExcel/${dirpath}/${taxcode}.xlsx`);
+    await workbook.xlsx.writeFile(__basedir + `/public/ExportExcel/${dirpath}/${taxcode}.xlsx`);
   }
 }
 
