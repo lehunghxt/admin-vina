@@ -118,7 +118,7 @@ export const ExportHaNoiData = async (Customers, FromDate, ToDate, Type) => {
     for (let i = 0; i < datas.length; i++) {
       var data = datas[i];
       data.invoices = MapToTaxHaNoiData(data.invoices);
-      data.details = MapToTaxHaNoiDetail(data.details);
+      data.details =  MapToTaxHaNoiDetail(data.invoices, data.details);
       await ExportExcel(data.customer.Taxcode, data.invoices, data.details, Type);
     }
   } catch (error) {
@@ -168,43 +168,45 @@ const MapToTaxHaNoiData = (invoices) => {
 }
 
 const MapToTaxHaNoiDetail = (invoices, details) => {
-  for (let i = 0; i < invoices.length; i++) {
-    let invoice = invoices[i];
-    let invoiceDetails = details.filter(e => e.IvoiceId == invoice.Id);
-    for (let y = 0; y < invoiceDetails.length; y++) {
-      invoiceDetails[y].Tax = (invoiceDetails[y].Tax == 0 && invoice.Tax != 0) ? invoice.Tax : invoiceDetails[y].Tax;
-      invoiceDetails[y].TemptCode = invoice.TemptCode;
-      invoiceDetails[y].Symbol = invoice.Symbol;
-      invoiceDetails[y].InvoiceNumber = invoice.InvoiceNumber;
+    var result = [];
+    for (let i = 0; i < invoices.length; i++) {
+        let invoice = invoices[i];
+        let invoiceDetails = details.filter(e => e.IvoiceId == invoice.Id);
+        for (let y = 0; y < invoiceDetails.length; y++) {
+        invoiceDetails[y].Tax = (invoiceDetails[y].Tax == 0 && invoice.Tax != 0) ? invoice.Tax : invoiceDetails[y].Tax;
+        invoiceDetails[y].TemptCode = invoice.TemptCode;
+        invoiceDetails[y].Symbol = invoice.Symbol;
+        invoiceDetails[y].InvoiceNumber = invoice.InvoiceNumber;
 
-      invoiceDetails[y].Tax = invoiceDetails[y].Tax == -1 ? 0 : invoiceDetails[y].Tax;
-      invoiceDetails[y].MoneyTax = invoiceDetails[y].MoneyTax ? invoiceDetails[y].MoneyTax : (invoiceDetails[y].TotalMoney * invoiceDetails[y].Tax / 100);
-      if (invoiceDetails[y].Discount && y > 0 && invoiceDetails[y].IvoiceId == invoiceDetails[y - 1].IvoiceId) {
-        invoiceDetails[y].DiscountMoney = invoiceDetails[y].TotalMoney;
-        invoiceDetails[y].TotalMoneyAfterTax = 0;
-        invoiceDetails[y].Tax = 0;
-        invoiceDetails[y].MoneyTax = 0;
-        invoiceDetails[y].TotalMoney = 0;
+        invoiceDetails[y].Tax = invoiceDetails[y].Tax == -1 ? 0 : invoiceDetails[y].Tax;
+        invoiceDetails[y].MoneyTax = invoiceDetails[y].MoneyTax ? invoiceDetails[y].MoneyTax : (invoiceDetails[y].TotalMoney * invoiceDetails[y].Tax / 100);
+        if (invoiceDetails[y].Discount && y > 0 && invoiceDetails[y].IvoiceId == invoiceDetails[y - 1].IvoiceId) {
+            invoiceDetails[y].DiscountMoney = invoiceDetails[y].TotalMoney;
+            invoiceDetails[y].TotalMoneyAfterTax = 0;
+            invoiceDetails[y].Tax = 0;
+            invoiceDetails[y].MoneyTax = 0;
+            invoiceDetails[y].TotalMoney = 0;
 
-        invoiceDetails[y - 1].TotalMoney = invoiceDetails[y - 1].TotalMoney - invoiceDetails[y].DiscountMoney;
-        invoiceDetails[y - 1].MoneyTax = invoiceDetails[y - 1].TotalMoney * invoiceDetails[y - 1].Tax / 100;
-        invoiceDetails[y - 1].TotalMoney = invoiceDetails[y - 1].TotalMoney + invoiceDetails[y - 1].MoneyTax;
-      }
-      else if (invoiceDetails[y].Discount && y > 0 && invoiceDetails[y].IvoiceId == invoiceDetails[y + 1].IvoiceId) {
-        invoiceDetails[y].DiscountMoney = invoiceDetails[y].TotalMoney;
-        invoiceDetails[y].TotalMoneyAfterTax = 0;
-        invoiceDetails[y].Tax = 0;
-        invoiceDetails[y].MoneyTax = 0;
-        invoiceDetails[y].TotalMoney = 0;
+            invoiceDetails[y - 1].TotalMoney = invoiceDetails[y - 1].TotalMoney - invoiceDetails[y].DiscountMoney;
+            invoiceDetails[y - 1].MoneyTax = invoiceDetails[y - 1].TotalMoney * invoiceDetails[y - 1].Tax / 100;
+            invoiceDetails[y - 1].TotalMoney = invoiceDetails[y - 1].TotalMoney + invoiceDetails[y - 1].MoneyTax;
+        }
+        else if (invoiceDetails[y].Discount && y > 0 && invoiceDetails[y].IvoiceId == invoiceDetails[y + 1].IvoiceId) {
+            invoiceDetails[y].DiscountMoney = invoiceDetails[y].TotalMoney;
+            invoiceDetails[y].TotalMoneyAfterTax = 0;
+            invoiceDetails[y].Tax = 0;
+            invoiceDetails[y].MoneyTax = 0;
+            invoiceDetails[y].TotalMoney = 0;
 
-        invoiceDetails[y + 1].TotalMoney = invoiceDetails[y + 1].TotalMoney - invoiceDetails[y].DiscountMoney;
-        invoiceDetails[y + 1].MoneyTax = invoiceDetails[y + 1].TotalMoney * invoiceDetails[y + 1].Tax / 100;
-        invoiceDetails[y + 1].TotalMoney = invoiceDetails[y + 1].TotalMoney + invoiceDetails[y + 1].MoneyTax;
-      }
+            invoiceDetails[y + 1].TotalMoney = invoiceDetails[y + 1].TotalMoney - invoiceDetails[y].DiscountMoney;
+            invoiceDetails[y + 1].MoneyTax = invoiceDetails[y + 1].TotalMoney * invoiceDetails[y + 1].Tax / 100;
+            invoiceDetails[y + 1].TotalMoney = invoiceDetails[y + 1].TotalMoney + invoiceDetails[y + 1].MoneyTax;
+        }
+        }
+        //result = [...result, ...invoiceDetails];
+        result.push(...invoiceDetails);
     }
-    result = [...result, ...invoiceDetails];
-  }
-  return result;
+    return result;
 }
 
 const ExportExcel = async (taxcode, invoices, details, type) => {
@@ -596,7 +598,7 @@ const GetTaxReportData = async (Customers, FromDate, ToDate, ReportType) => {
         }
       }
       if (!invoices || invoices.length < 1) continue;
-      var details = GetInvoiceDetailByInvoiceIds(invoiceIds, customer.type);
+      var details = await GetInvoiceDetailByInvoiceIds(invoiceIds, customer.type);
       result = [...result, { customer, invoices, details }];
     };
     return result;

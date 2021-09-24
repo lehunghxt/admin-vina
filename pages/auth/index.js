@@ -13,7 +13,7 @@ export default function Login() {
                         <div className="card o-hidden border-0 shadow-lg my-5">
                             <div className="card-body p-0">
                                 <div className="row">
-                                    <div className="col-lg-6 d-none d-lg-block bg-login-image" style={{ backgroundRepeat: "no-repeat", backgroundSize: "80% 50%" }}></div>
+                                    <div className="col-lg-6 d-none d-lg-block bg-login-image" style={{ backgroundRepeat: "no-repeat", backgroundSize: "80% 25%" }}></div>
                                     <div className="col-lg-6">
                                         <div className="p-5">
                                             <div className="text-center">
