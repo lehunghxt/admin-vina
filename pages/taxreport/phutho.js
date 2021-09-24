@@ -5,11 +5,11 @@ import { useUser } from 'Provider/UserProvider'
 
 import { useLoading } from '../../Provider/LoadingProvider';
 
-function Hanoi() {
+function Phutho() {
     const { show, hide } = useLoading();
 
     const { User } = useUser();
-    const [query, setQuery] = useState({ provinceid: '01' })
+    const [query, setQuery] = useState({ provinceid: '26' })
     const [taxcodes, setTaxcodes] = useState([])
     const [searchtaxcodes, setSearchtaxcodes] = useState([])
     const [taxcode, setTaxcode] = useState('')
@@ -88,16 +88,18 @@ function Hanoi() {
         try {
             e.preventDefault();
             show();
+            if (User.UserType !== 1 && !query.taxcode) {
+                alert("Vui lòng nhập mã số thuế");
+                return false;
+            }
             if (!query.fromdate || !query.todate) {
                 alert("Ngày không hợp lệ");
-                hide();
                 return false;
             }
             query.type = type;
             var data = await Get('taxreport', { params: query });
             if (data.error) {
                 alert(data.error);
-                hide();
                 return false;
             }
             setTaxcodes(data || []);
@@ -113,8 +115,11 @@ function Hanoi() {
         try {
             show();
             e.preventDefault();
+            if (User.UserType !== 1 && !query.taxcode) {
+                alert("Vui lòng nhập mã số thuế");
+                return false;
+            }
             if (!query.fromdate || !query.todate) {
-                hide();
                 alert("Ngày không hợp lệ");
                 return false;
             }
@@ -122,7 +127,6 @@ function Hanoi() {
             query.customers = searchtaxcodes;
             var data = await Post('taxreport', { params: query, responseType: 'blob' });
             if (data.error) {
-                hide();
                 alert(data.error);
                 return false;
             }
@@ -143,7 +147,7 @@ function Hanoi() {
     return (
         <>
             <Head>
-                <title>Báo cáo Hà Nội</title>
+                <title>Báo cáo Phú thọ</title>
                 <link rel="icon" href="/logo.ico" />
             </Head>
             <div className="card">
@@ -232,8 +236,7 @@ const ListTaxcodes = ({ taxcodes, callback }) => {
         <>
             {
                 taxcodes && taxcodes.length > 0 ? taxcodes.map(t => {
-                    return
-                    <>
+                    return <>
                         <span key={t.Id} className={t.type == 1 ? "text-primary" : t.type == 2 ? "text-warning" : "text-danger"}>
                             <input type="checkbox" checked={t.isRemoved ? false : true} id={`check_${t.Id}`} value={t.Id} onClick={e => callback(e)} style={{ marginRight: "0.25em" }} />
                             <label htmlFor={`check_${t.Id}`}>{t.Taxcode}</label>
@@ -253,4 +256,4 @@ export const getServerSideProps = async () => {
     }
 }
 
-export default Hanoi
+export default Phutho

@@ -4,6 +4,7 @@ import "../public/asset/vendor/fontawesome-free/css/all.min.css";
 import "../public/asset/css/sb-admin-2.min.css";
 import Layout from "../component/Layout";
 import UserProvider from "../Provider/UserProvider";
+import SocketProvider from "../Provider/SocketProvider";
 import LoadingProvider from "../Provider/LoadingProvider";
 
 
@@ -15,9 +16,11 @@ function MyApp({ Component, pageProps, User }) {
     <>
       <LoadingProvider>
         <UserProvider User={User}>
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
+          <SocketProvider>
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          </SocketProvider>
         </UserProvider>
       </LoadingProvider>
     </>

@@ -1,16 +1,25 @@
+import { SplitArray } from '@Helper/ArrayHelper'
 const { connect, Request } = require('mssql');
 const sequelize = require('./DAL/index').sequelize;
 const sequelizeEHD = require('./DAL/index').sequelizeEHD;
 const _InvoiceModel = require('./DAL/tblIvoice');
 const _AdjustedInvoiceModel = require('./DAL/tblAdjustedInvoice');
 const _InvoiceReplaceModel = require('./DAL/tblInvoiceReplace');
+const _InvoiceDetailModel = require("../Model/DAL/tblIvoiceDetail");
+const _NoticeissuedModel = require("../Model/DAL/tblNoticeissued");
+const _IvoiceTemptModel = require("../Model/DAL/tblIvoiceTempt");
 
 const InvoiceModel = _InvoiceModel(sequelize);
 const AdjustedInvoiceModel = _AdjustedInvoiceModel(sequelize);
 const ReplaceInvoiceModel = _InvoiceReplaceModel(sequelize);
+const InvoiceDetailModel = _InvoiceDetailModel(sequelize);
+
 const InvoiceModelEHD = _InvoiceModel(sequelizeEHD);
 const AdjustedInvoiceModelEHD = _AdjustedInvoiceModel(sequelizeEHD);
 const ReplaceInvoiceModelEHD = _InvoiceReplaceModel(sequelizeEHD);
+const InvoiceDetailModelEHD = _InvoiceDetailModel(sequelizeEHD);
+const NoticeissuedModelEHD = _NoticeissuedModel(sequelizeEHD);
+const IvoiceTemptModelEHD = _IvoiceTemptModel(sequelizeEHD)
 
 const config = {
     encrypt: false,
@@ -27,6 +36,73 @@ const configEHD = {
     server: "10.0.0.51",
     database: "Einvoince",
 };
+
+export const GetAccessedInvoices = async (CustomerId, FromDate, ToDate, Type) => {
+    var query = {
+        where: {
+            CustomerId,
+            $or: [
+                {
+                    $and: [{ CreateDate: { $gte: FromDate } }, {
+                        CreateDate: { $lte: ToDate }
+                    }]
+                },
+                {
+                    $and: [{ ModifiedDate: { $gte: FromDate } }, {
+                        ModifiedDate: { $lte: ToDate }
+                    }]
+                },
+                {
+                    $and: [{ DateofInvoice: { $gte: FromDate } }, {
+                        DateofInvoice: { $lte: ToDate }
+                    }]
+                },
+                {
+                    $and: [{ DateofSign: { $gte: FromDate } }, {
+                        DateofSign: { $lte: ToDate }
+                    }]
+                },
+                {
+                    $and: [{ ConvertDate: { $gte: FromDate } }, {
+                        ConvertDate: { $lte: ToDate }
+                    }]
+                },
+            ]
+        },
+        order: [
+            ['NoticeissuedId', 'ASC'],
+            ['InvoiceNumber', 'DESC'],
+        ],
+    }
+    if (Type === 2 || Type === 3)
+        return await InvoiceModel.findAll(query);
+    else {
+        var data = await InvoiceModelEHD.findAll(query);
+        const NoticeIds = [...new Set(data.map(i => parseInt(i.NoticeissuedId)))];
+        const Notices = await NoticeissuedModelEHD.findAll({
+            where: {
+                Id: NoticeIds
+            }
+        })
+        const IvoiceTemptIds = [...new Set(Notices.map(i => parseInt(i.IvoiceTemptId)))];
+        const Tempts = await IvoiceTemptModelEHD.findAll({
+            where: {
+                Id: IvoiceTemptIds
+            }
+        });
+        data = data.map(e => {
+            var notice = Notices.find(n => n.Id === e.NoticeissuedId);
+            var tempt = Tempts.find(t => t.Id === notice.IvoiceTemptId);
+            e.TemptCode = tempt.TemptCode;
+            e.Symbol = notice.Symbol;
+            e.SellerCompanyName = tempt.Name;
+            e.SellerTaxCode = tempt.Taxcode;
+            e.SellerCompanyAddress = tempt.Address;
+            return e;
+        })
+        return data;
+    }
+}
 
 export const GetInvoicesByIds = async (Ids, customerId, Type) => {
     const query = {
@@ -145,4 +221,34 @@ export const GetReplacedLinks = async (Ids, customerId, Type) => {
     if (Type === 2 || Type === 3)
         return await ReplaceInvoiceModel.findAll(query)
     return await ReplaceInvoiceModelEHD.findAll(query)
+}
+
+export const GetInvoiceDetailByInvoiceIds = async (invoiceIds, Type) => {
+    invoiceIds = SplitArray(invoiceIds, 1000);
+    var details = [];
+    if (Type === 2 || Type === 3)
+        for (let i = 0; i < invoiceIds.length; i++) {
+            var detailpart = await InvoiceDetailModel.findAll({
+                where: {
+                    IvoiceId: invoiceIds[i]
+                }
+            });
+            details = [...details, ...detailpart];
+        }
+    else for (let i = 0; i < invoiceIds.length; i++) {
+        var detailpart = await InvoiceDetailModelEHD.findAll({
+            where: {
+                IvoiceId: invoiceIds[i]
+            }
+        });
+        details = [...details, ...detailpart];
+    }
+    details = details.sort((a, b) => {
+        a.IvoiceId > b.IvoiceId ? 1 :
+            a.IvoiceId < b.IvoiceId ? -1 :
+                a.Id > b.Id ? 1 :
+                    a.Id < b.Id ? -1 :
+                        0
+    });
+    return details;
 }

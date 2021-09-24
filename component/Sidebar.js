@@ -27,25 +27,17 @@ export default function Sidebar() {
           </Link>
         </li>
         <li className="nav-item">
-          <Link href="/users" passHref={true}>
-            <a className="nav-link">
-              <i className="fas fa-fw fa-tachometer-alt"></i>
-              <span>Danh sách user</span>
-            </a>
-          </Link>
-        </li>
-        <li className="nav-item">
           <Link href="/lockuser" passHref={true}>
             <a className="nav-link">
-              <i className="fas fa-fw fa-tachometer-alt"></i>
-              <span>Lock User</span>
+              <i className="fa fa-lock"></i>
+              <span>Khóa/Reset tài khoản</span>
             </a>
           </Link>
         </li>
         <li className="nav-item">
           <Link href="/taxreport" passHref={true}>
             <a className="nav-link">
-              <i className="fas fa-fw fa-tachometer-alt"></i>
+              <i className="fa fa-book"></i>
               <span>Báo cáo thuế</span>
             </a>
           </Link>

@@ -3,16 +3,16 @@ import Link from "next/link"
 function Index() {
     return (
         <>
-            <button type="button" className="btn btn-secondary mr-5">
-                <Link href="/taxreport/hanoi" passHref={true}>
+            <Link href="/taxreport/hanoi" passHref={true}>
+                <button type="button" className="btn btn-secondary mr-5">
                     <i className="link">Báo cáo thuế Hà Nội</i>
-                </Link>
-            </button>
-            <button type="button" className="btn btn-secondary">
-                <Link href="/taxreport/phutho" passHref={true}>
+                </button>
+            </Link>
+            <Link href="/taxreport/phutho" passHref={true}>
+                <button type="button" className="btn btn-secondary">
                     <i className="link">Báo cáo thuế Phú Thọ</i>
-                </Link>
-            </button>
+                </button>
+            </Link>
         </>
     )
 }

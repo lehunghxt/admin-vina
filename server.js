@@ -11,13 +11,14 @@ const handle = nextApp.getRequestHandler();
 const session = require("express-session");
 const redirectLoop = require("express-redirect-loop");
 const lib = require("./Helper/FileHelper");
-app.use(
-  session({
-    secret: "secret",
-    resave: true,
-    saveUninitialized: true,
-  })
-);
+
+const sessionMidlleWare = session({
+  secret: "VinaCA@123!@#",
+  resave: true,
+  saveUninitialized: true,
+})
+
+app.use(sessionMidlleWare);
 app.use(
   redirectLoop({
     defaultPath: "/",
@@ -25,12 +26,33 @@ app.use(
   })
 );
 
+io.use((socket, next) => {
+  sessionMidlleWare(socket.handshake, socket.handshake.res || {}, next);
+})
+
 global.__basedir = __dirname;
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // =============================LISTENING SOCKET.IO===============================
+const rooms = ['EHD7', 'EHD10', 'HD7', 'HD10']
 io.on("connection", (socket) => {
+  const key = socket.handshake.query.tọken;
+  switch (key) {
+    case "EHD7": socket.join('EHD7')
+      break;
+    case "EHD10": socket.join('EHD10')
+      break;
+    case "HD7": socket.join('HD7')
+      break;
+    case "HD10": socket.join('HD10')
+      break;
+    default: {
+      socket.join('master')
+    }
+      break;
+  }
+
   console.log("We have a new connection!!!");
   socket.emit("now", {
     message: "zeit",
@@ -69,6 +91,27 @@ io.on("connection", (socket) => {
       socket.emit("error", err);
     }
   });
+  socket.on('ClientCount', async () => {
+    var count = [];
+    var time = (new Date()).toLocaleTimeString();
+
+    // rooms.forEach(async element => {
+    //   var len = (await io.in(element).fetchSockets()).length;
+    //   console.log(len)
+    //   count.push({
+    //     server: element, time: time, value: (len - 1)
+    //   })
+    // });
+    for await (const room of rooms) {
+      var len = (await io.in(room).fetchSockets()).length;
+      count.push({
+        server: room, time: time, value: len
+      })
+    }
+    io.in('master').emit("ClientCount", count);
+  });
+  socket.on('disconnect', () => {
+  })
 });
 //================================================================================
 nextApp.prepare().then(() => {

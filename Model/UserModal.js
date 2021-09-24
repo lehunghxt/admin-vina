@@ -30,16 +30,12 @@ module.exports.LoginUser = async function (username, password) {
     })
 }
 
-module.exports.GetIdLockUser = function (taxcode) {
-    return new Promise((resolve, reject) => {
-        var data = UserModal.GetIdLockUser(taxcode)
-            .then((data) => {
-                resolve(data);
-            })
-            .catch((err) => {
-                reject({});
-            });
-    });
+module.exports.GetIdLockUser = async function (taxcode) {
+    return await UserModel.findAll({
+        where: {
+            taxcode
+        }
+    })
 };
 
 module.exports.GetUserRolesById = async function (Id) {
