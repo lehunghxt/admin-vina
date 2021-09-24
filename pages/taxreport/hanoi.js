@@ -9,7 +9,7 @@ function Hanoi() {
     const { show, hide } = useLoading();
 
     const { User } = useUser();
-    const [query, setQuery] = useState({ provinceid: '01' })
+    const [query, setQuery] = useState({ provinceid: '03', action: "Hanoi" })
     const [taxcodes, setTaxcodes] = useState([])
     const [searchtaxcodes, setSearchtaxcodes] = useState([])
     const [taxcode, setTaxcode] = useState('')
@@ -231,16 +231,14 @@ const ListTaxcodes = ({ taxcodes, callback }) => {
     return (
         <>
             {
-                taxcodes && taxcodes.length > 0 ? taxcodes.map(t => {
-                    return
+                taxcodes && taxcodes.length > 0 ? taxcodes.map(t =>
                     <>
                         <span key={t.Id} className={t.type == 1 ? "text-primary" : t.type == 2 ? "text-warning" : "text-danger"}>
                             <input type="checkbox" checked={t.isRemoved ? false : true} id={`check_${t.Id}`} value={t.Id} onClick={e => callback(e)} style={{ marginRight: "0.25em" }} />
                             <label htmlFor={`check_${t.Id}`}>{t.Taxcode}</label>
                         </span>
                     </>
-                })
-                    : <div className="text-center">Không tìm thấy dữ liệu</div>
+                ) : <div className="text-center">Không tìm thấy dữ liệu</div>
             }
         </>
     )

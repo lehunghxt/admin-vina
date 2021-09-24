@@ -15,11 +15,15 @@ const reducer = (state, action) => {
 function OnlineStatus() {
     const [data, dispatch] = useReducer(reducer, [])
     var { socket } = useSocket();
+    var interval;
     useEffect(() => {
         if (socket) {
-            setInterval(() => {
+            interval = setInterval(() => {
                 socket.emit('ClientCount');
             }, 1000);
+        }
+        return () => {
+            interval && clearInterval(interval);
         }
     }, [socket]);
     if (socket)
