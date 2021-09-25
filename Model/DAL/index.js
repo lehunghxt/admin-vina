@@ -2,9 +2,8 @@ const Sequelize = require('sequelize-v5');
 Sequelize.DATE.prototype._stringify = function _stringify(date, options) {
     return this._applyTimezone(new Date(date), options).format('YYYY-MM-DD HH:mm:ss.SSS');
 };
-import { WriteFile } from '@Helper/FileHelper';
 const Op = Sequelize.Op
-const sequelizeSVA = new Sequelize({
+module.exports.sequelizeSVA = new Sequelize({
     //database: "HDDT",
     // password: "VinaCA@123!@#",
     // host: '192.168.10.2',
@@ -48,7 +47,7 @@ const sequelizeSVA = new Sequelize({
     }
 });
 
-const sequelize = new Sequelize({
+module.exports.sequelize = new Sequelize({
     //database: "HDDT",
     // password: "VinaCA@123!@#",
     // host: '192.168.10.2',
@@ -92,7 +91,7 @@ const sequelize = new Sequelize({
     }
 });
 
-const sequelizeEHD = new Sequelize({
+module.exports.sequelizeEHD = new Sequelize({
     database: "Einvoince",
     // password: "VinaCA@123!@#",
     // host: '192.168.10.2',
@@ -135,8 +134,8 @@ const sequelizeEHD = new Sequelize({
     }
 });
 
-export {
-    sequelizeEHD,
-    sequelize,
-    sequelizeSVA
-}
+// export  {
+//     sequelizeEHD,
+//     sequelize,
+//     sequelizeSVA,
+// };

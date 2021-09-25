@@ -1,6 +1,7 @@
 import { GetInvoiceCode, VoidNotSignedInvoices, GetInvoicesByIds, GetAdjustedLinks, GetReplacedLinks, GetInvoiceDetailByInvoiceIds, GetAccessedInvoices } from "../Model/InvoiceModel";
 import { CreateFolder } from '@Helper/FileHelper'
 import { UniqueByKey } from '@Helper/ArrayHelper'
+import { LogActionCancleInvoice } from '@Helper/LogAction'
 const Excel = require("exceljs");
 const sequelize = require("../Model/DAL/").sequelize;
 const sequelizeEHD = require("../Model/DAL/").sequelizeEHD;
@@ -112,9 +113,9 @@ export const PrepareTaxCode = async (ProvinceId, FromDate, ToDate) => {
   return result.map(e => ({ ...e, IsKeepInvocie: parseInt(e.IsKeepInvocie) }));
 }
 
-export const ExportHaNoiData = async (Customers, FromDate, ToDate, Type) => {
+export const ExportHaNoiData = async (Customers, FromDate, ToDate, Type, CurrentUser = null) => {
   try {
-    var datas = await GetTaxReportData(Customers, FromDate, ToDate, 1);
+    var datas = await GetTaxReportData(Customers, FromDate, ToDate, 1, CurrentUser);
     for (let i = 0; i < datas.length; i++) {
       var data = datas[i];
       data.invoices = MapToTaxHaNoiData(data.invoices);
@@ -506,7 +507,7 @@ const MapToPhuThoDetail = (details) => {
   return result;
 }
 
-const GetTaxReportData = async (Customers, FromDate, ToDate, ReportType) => {
+const GetTaxReportData = async (Customers, FromDate, ToDate, ReportType, CurrentUser = null) => {
   var result = [];
   try {
     for (let index = 0; index < Customers.length; index++) {
@@ -524,27 +525,31 @@ const GetTaxReportData = async (Customers, FromDate, ToDate, ReportType) => {
           invoiceIds = invoiceIds.filter(e => !removeInvoiceIds.includes(e))
           continue;
         }
-        // if (customer.IsKeepInvocie && parseInt(customer.IsKeepInvocie) == 1) {
-        //   const lastSignedInvoiceInList = InvoicesByNotice.filter(e => e.Status !== 1).reduce((prev, current) => (prev && prev.InvoiceNumber > current.InvoiceNumber) ? prev : current, null)
-        //   if (!lastSignedInvoiceInList) continue;
-        //   const ListNotSigned = InvoicesByNotice.filter(e => e.InvoiceNumber < lastSignedInvoiceInList.InvoiceNumber && e.Status === 1);
-        //   if (ListNotSigned && ListNotSigned.length > 0) {
-        //     var ListNeedUpdate = [];
-        //     ListNotSigned.forEach(async e => {
-        //       var invoice = invoices.find(i => i.Id == e.Id);
-        //       if (!({ IvoiceCode } = invoice))
-        //         invoice.IvoiceCode = await GetInvoiceCode();
-        //       invoice.Status = 5;
-        //       invoice.DateofSign = invoice.DateofInvoice;
+        if (customer.IsKeepInvocie && parseInt(customer.IsKeepInvocie) == 1) {
+          const lastSignedInvoiceInList = InvoicesByNotice.filter(e => e.Status !== 1).reduce((prev, current) => (prev && prev.InvoiceNumber > current.InvoiceNumber) ? prev : current, null)
+          if (!lastSignedInvoiceInList) continue;
+          const ListNotSigned = InvoicesByNotice.filter(e => e.InvoiceNumber < lastSignedInvoiceInList.InvoiceNumber && e.Status === 1);
+          if (ListNotSigned && ListNotSigned.length > 0) {
+            var ListNeedUpdate = [];
+            ListNotSigned.forEach(async e => {
+              var invoice = invoices.find(i => i.Id == e.Id);
+              if (!({ IvoiceCode } = invoice))
+                invoice.IvoiceCode = await GetInvoiceCode();
+              invoice.Status = 5;
+              invoice.DateofSign = invoice.DateofInvoice;
 
-        //       ListNeedUpdate.push(invoice);
-        //       //Update result
-        //       InvoicesByNotice[InvoicesByNotice.findIndex(e => e.Id == invoice.Id)] = invoice;
-        //       invoices[invoices.findIndex(e => e.Id == invoice.Id)] = invoice;
-        //     });
-        //     await VoidNotSignedInvoices(ListNeedUpdate, customer.Id);
-        //   }
-        // }
+              ListNeedUpdate.push(invoice);
+              //Update result
+              InvoicesByNotice[InvoicesByNotice.findIndex(e => e.Id == invoice.Id)] = invoice;
+              invoices[invoices.findIndex(e => e.Id == invoice.Id)] = invoice;
+            });
+            console.log('======================================');
+            console.log(ListNeedUpdate);
+            //await LogActionCancleInvoice(ListNeedUpdate, CurrentUser)
+            console.log('======================================');
+            //await VoidNotSignedInvoices(ListNeedUpdate, customer.Id);
+          }
+        }
         InvoicesByNotice = InvoicesByNotice.filter(e => e.Status > 1);
         invoices = InvoicesByNotice.filter(e => e.Status > 1 && e.NoticeissuedId == NoticeIds[i]);
         var listProcess = InvoicesByNotice.filter(e => e.Status === 3 || e.Status === 6);

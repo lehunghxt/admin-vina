@@ -32,7 +32,7 @@ module.exports = sequelize => {
       field: "Status"
     },
     Description: {
-      type: DataTypes.STRING(max),
+      type: DataTypes.STRING(200),
       allowNull: true,
       defaultValue: null,
       primaryKey: false,

@@ -17,7 +17,6 @@ const ZipFolder = async (source) => {
         await archive.finalize();
         return;
     } catch (error) {
-        console.log(error);
         throw error;
     }
 }

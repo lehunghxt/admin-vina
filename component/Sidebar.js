@@ -6,7 +6,7 @@ export default function Sidebar() {
   return (
     <>
       <ul
-        className="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion"
+        className="navbar-nav bg-gradient-dark sidebar sidebar-dark accordion"
         id="accordionSidebar"
       >
         <Link href="/" passHref={true}>

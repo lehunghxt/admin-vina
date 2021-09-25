@@ -1,6 +1,12 @@
 const sequelizeSVA = require('./DAL/index').sequelizeSVA;
+const sequelize = require('./DAL/index').sequelize;
+
 const _UserModel = require('./DAL/AccountModel');
 const UserModel = _UserModel(sequelizeSVA);
+
+const _CustomerModel = require('./DAL/tblCustomer');
+const CustomerModel = _CustomerModel(sequelize);
+
 const _PerrmissionsModel = require('./DAL/Permissions');
 const PerrmissionsModel = _PerrmissionsModel(sequelizeSVA);
 const sql = require("mssql");
@@ -12,7 +18,7 @@ const config = {
     database: 'SVA',
 };
 
-export const GetUser = async (username) => {
+module.exports.GetUser = async (username) => {
     return await UserModel.findOne({
         where: {
             UserName: username,
@@ -20,7 +26,7 @@ export const GetUser = async (username) => {
     })
 }
 
-export const GetUserPerrmissions = async (userId) => {
+module.exports.GetUserPerrmissions = async (userId) => {
     var Permissions = (await UserModel.findOne({
         attributes: ['Permissions'],
         where: {
@@ -34,3 +40,11 @@ export const GetUserPerrmissions = async (userId) => {
         }
     })).map(e => e.Code);
 }
+
+module.exports.GetIdLockUser = async function (taxcode) {
+    return await CustomerModel.findAll({
+        where: {
+            Taxcode : taxcode,
+        }
+    })
+};

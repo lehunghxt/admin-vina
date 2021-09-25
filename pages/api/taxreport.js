@@ -41,9 +41,10 @@ async function Get(req, res, next) {
 async function Post(req, res, next) {
     try {
         const { customers, fromdate, todate, type, action } = req.body.params;
+        const CurrentUser = req.session.User;
         switch (action) {
             case "Hanoi": {
-                await ExportHaNoiData(customers, fromdate, todate, type)
+                await ExportHaNoiData(customers, fromdate, todate, type, CurrentUser)
                 const d = new Date();
                 var path = `/public/ExportExcel/${d.getDate().toString().padStart(2, '0')}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getFullYear()}`
                 await ZipFolder(path);

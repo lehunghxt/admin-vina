@@ -3,7 +3,6 @@ const path = require('path');
 
 const ReadFile = async (filepath) => {
     var data = await fs.readFile(path.join(__basedir + "/" + filepath), "utf-8");
-    console.log(data)
     return data;
 }
 
