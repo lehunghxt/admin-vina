@@ -10,7 +10,7 @@ const nextApp = next({});
 const handle = nextApp.getRequestHandler();
 const session = require("express-session");
 const redirectLoop = require("express-redirect-loop");
-const lib = require("./Helper/FileHelper");
+const {WriteFile, ReadFile} = require("./Helper/FileHelper");
 
 const sessionMidlleWare = session({
   secret: "VinaCA@123!@#",
@@ -54,41 +54,42 @@ io.on("connection", (socket) => {
   }
 
   console.log("We have a new connection!!!");
-  socket.emit("now", {
-    message: "zeit",
-  });
   socket.on("lockcustomer", async (taxcode) => {
     try {
       console.log("server da nghe duoc");
-      var data = await lib.ReadFile("taxcodes.txt", "utf-8");
+      var data = await ReadFile("taxcodes.txt", "utf-8");
       var taxcodes = data ? data.split(",") : [];
       if (!taxcodes.includes(taxcode)) {
         taxcodes.push(taxcode);
-        await lib.WriteFile("taxcodes.txt", taxcodes.join(","));
+        //Ghi log tại đây
+        await WriteFile("taxcodes.txt", taxcodes.join(","));
         io.emit("lockcustomer", taxcode);
       } else io.emit("lockcustomer", taxcode);
     } catch (error) {
-      console.log("thong bao loi");
-      console.log(error);
-      socket.emit("error", error);
+        socket.emit("error", 'Đã có lỗi xảy ra.');
     }
   });
   socket.on("lockuser", async (taxcode) => {
     try {
-      console.log(taxcode);
-      var data = await UserController.GetIdLockUser(taxcode);
-      var thisids = data.recordset.map((e) => e.Id);
-      thisids = thisids.join(",");
-      console.log(thisids);
-      var ids = await lib.ReadFile("ids.txt", "utf-8");
-      var ids = ids ? ids.split(",") : [];
-      if (!ids.includes(thisids)) {
-        ids.push(thisids);
-        await lib.WriteFile("ids.txt", ids.join(","));
-        io.emit("lockuser", thisids);
-      } else io.emit("lockuser", thisids);
+        const {GetIdLockUser} = require('./Controller/UserController');
+        var data = await GetIdLockUser(taxcode);
+        if(data.length > 0){
+            var thisids = data.map((e) => e.Id);
+            thisids = thisids.join(",");
+            var ids = await ReadFile("ids.txt", "utf-8");
+            var ids = ids ? ids.split(",") : [];
+            if (!ids.includes(thisids)) {
+                ids.push(thisids);
+                //Ghi log tại đây
+                await WriteFile("ids.txt", ids.join(","));
+                io.emit("lockuser", thisids);
+            } else io.emit("lockuser", thisids);
+        }else {
+            socket.emit("error", 'Không tìm thấy khách hàng !');
+        }
     } catch (err) {
-      socket.emit("error", err);
+        console.log(err);
+        socket.emit("error", 'Đã có lỗi xảy ra.');
     }
   });
   socket.on('ClientCount', async () => {
@@ -117,13 +118,13 @@ io.on("connection", (socket) => {
 nextApp.prepare().then(() => {
   app.post("/taxcode", async function (req, res) {
     var { taxcode } = req.body;
-    var taxcodes = await lib.ReadFile("taxcodes.txt");
+    var taxcodes = await ReadFile("taxcodes.txt");
     taxcodes = taxcodes.split(",");
     if (taxcodes && taxcodes.includes(taxcode)) {
       taxcodes = taxcodes.filter(function (value) {
         return value != taxcode;
       });
-      await lib.WriteFile("taxcodes.txt", taxcodes.join(","));
+      await WriteFile("taxcodes.txt", taxcodes.join(","));
       res.status(200).send();
     }
     res.status(202).send();
