@@ -10,14 +10,6 @@ const CustomerModel = _CustomerModel(sequelize);
 const _PerrmissionsModel = require('./DAL/Permissions');
 const PerrmissionsModel = _PerrmissionsModel(sequelizeSVA);
 const CryptoJS = require("crypto-js");
-const sql = require("mssql");
-const config = {
-    encrypt: false,
-    user: 'sa',
-    password: 'SqlAsap@123',
-    server: '10.0.0.51',
-    database: 'SVA',
-};
 
 module.exports.GetUser = async (username) => {
     return await UserModel.findOne({

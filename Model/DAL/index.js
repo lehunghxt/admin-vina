@@ -1,16 +1,14 @@
 const Sequelize = require('sequelize-v5');
+const SystemConfig = require('../../config');
 Sequelize.DATE.prototype._stringify = function _stringify(date, options) {
     return this._applyTimezone(new Date(date), options).format('YYYY-MM-DD HH:mm:ss.SSS');
 };
 const Op = Sequelize.Op
 module.exports.sequelizeSVA = new Sequelize({
-    //database: "HDDT",
-    // password: "VinaCA@123!@#",
-    // host: '192.168.10.2',
-    database: "SVA",
-    password: "SqlAsap@123",
-    host: '10.0.0.51',
-    username: "sa",
+    database: SystemConfig.SVA_SQL_CONFIG.database,
+    password: SystemConfig.SVA_SQL_CONFIG.password,
+    host: SystemConfig.SVA_SQL_CONFIG.host,
+    username: SystemConfig.SVA_SQL_CONFIG.username,
     dialect: 'mssql',
     pool: {
         max: 5,
@@ -48,12 +46,10 @@ module.exports.sequelizeSVA = new Sequelize({
 });
 
 module.exports.sequelize = new Sequelize({
-    //database: "HDDT",
-    // password: "VinaCA@123!@#",
-    // host: '192.168.10.2',
-    database: "EISV2",
-    password: "SqlAsap@123",
-    host: '10.0.0.51',
+    database: SystemConfig.HD_SQL_CONFIG.database,
+    password: SystemConfig.HD_SQL_CONFIG.password,
+    host: SystemConfig.HD_SQL_CONFIG.host,
+    username: SystemConfig.HD_SQL_CONFIG.username,
     username: "sa",
     dialect: 'mssql',
     pool: {
@@ -92,12 +88,10 @@ module.exports.sequelize = new Sequelize({
 });
 
 module.exports.sequelizeEHD = new Sequelize({
-    database: "Einvoince",
-    // password: "VinaCA@123!@#",
-    // host: '192.168.10.2',
-    password: "SqlAsap@123",
-    host: '10.0.0.51',
-    username: "sa",
+    database: SystemConfig.EHD_SQL_CONFIG.database,
+    password: SystemConfig.EHD_SQL_CONFIG.password,
+    host: SystemConfig.EHD_SQL_CONFIG.host,
+    username: SystemConfig.EHD_SQL_CONFIG.username,
     dialect: 'mssql',
     pool: {
         max: 5,

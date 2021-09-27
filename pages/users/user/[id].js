@@ -60,7 +60,7 @@ const User = ({ User, Permissions }) => {
             </Head>
             <div className="card shadow">
                 <div className="card-header">
-                    <h3>Tạo mới tài khoản</h3>
+                    <h3>Sửa tài khoản</h3>
                 </div>
                 <div className="card-body" style={{ pointerEvents: CurrentUser.Permissions.includes("edit_account") ? "all" : "none" }}>
                     <form onSubmit={handleSubmit}>
@@ -121,7 +121,7 @@ const User = ({ User, Permissions }) => {
                                                 <tbody>
                                                     <tr>
                                                         <td className='text-left'>
-                                                            <label style={{ cursor:"pointer" }} htmlFor={e.Code}>{e.Description}</label>
+                                                            <label style={{ cursor: "pointer" }} htmlFor={e.Code}>{e.Description}</label>
                                                         </td>
                                                         <td className='text-right'>
                                                             <input id={e.Code} onChange={handleInputChange} type="checkbox" value={e.Code} checked={user.Permissions.includes(e.Code)} />

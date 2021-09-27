@@ -1,5 +1,6 @@
 import { SplitArray } from '@Helper/ArrayHelper'
 const { connect, Request } = require('mssql');
+const SystemConfig = require('../config');
 const sequelize = require('./DAL/index').sequelize;
 const sequelizeEHD = require('./DAL/index').sequelizeEHD;
 const _InvoiceModel = require('./DAL/tblIvoice');
@@ -22,19 +23,19 @@ const NoticeissuedModelEHD = _NoticeissuedModel(sequelizeEHD);
 const IvoiceTemptModelEHD = _IvoiceTemptModel(sequelizeEHD)
 
 const config = {
-    encrypt: false,
-    user: "sa",
-    password: "SqlAsap@123",
-    server: "10.0.0.51",
-    database: "EISV2",
+    encrypt: SystemConfig.HD_SQL_CONFIG.encrypt,
+    user: SystemConfig.HD_SQL_CONFIG.username,
+    password: SystemConfig.HD_SQL_CONFIG.password,
+    server: SystemConfig.HD_SQL_CONFIG.host,
+    database: SystemConfig.HD_SQL_CONFIG.database
 };
 
 const configEHD = {
-    encrypt: false,
-    user: "sa",
-    password: "SqlAsap@123",
-    server: "10.0.0.51",
-    database: "Einvoince",
+    encrypt: SystemConfig.EHD_SQL_CONFIG.encrypt,
+    user: SystemConfig.EHD_SQL_CONFIG.username,
+    password: SystemConfig.EHD_SQL_CONFIG.password,
+    server: SystemConfig.EHD_SQL_CONFIG.host,
+    database: SystemConfig.EHD_SQL_CONFIG.database
 };
 
 export const GetAccessedInvoices = async (CustomerId, FromDate, ToDate, Type) => {
