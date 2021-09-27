@@ -1,8 +1,10 @@
 import React from 'react'
 import { useState } from "react";
 import Swal from "sweetalert2";
+import { useUser } from 'Provider/UserProvider';
 
 export default function ResetAccount({ socket }) {
+    const { User } = useUser();
     const [taxcode, setTaxcode] = useState("");
     socket.on("lockuser", (taxcode) => {
       Swal.fire({
@@ -28,7 +30,7 @@ export default function ResetAccount({ socket }) {
           })
           return;
       }
-      socket.emit("lockuser", taxcode);
+      socket.emit("lockuser", ({taxcode, User}));
     };
     return (
       <>

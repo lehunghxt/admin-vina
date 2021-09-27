@@ -8,16 +8,17 @@ import ResetAccount from "@Component/lock-user/ResetAccount";
 function LockUser() {
   const { socket } = useSocket();
   const [tab, setTab] = useState(true);
-
-  socket.on("error", (error) => {
-    Swal.fire({
-      title: "Thông báo",
-      icon: "warning",
-      html: `${(error)}`,
-      confirmButtonColor: "#3085d6",
-      confirmButtonText: "Ok",
-    });
-  });
+    if(socket){
+        socket.on("error", (error) => {
+            Swal.fire({
+                title: "Thông báo",
+                icon: "warning",
+                html: `${(error)}`,
+                confirmButtonColor: "#3085d6",
+                confirmButtonText: "Ok",
+            });
+        });
+    }
   return (
     <>
       <Head>
@@ -55,7 +56,7 @@ function LockUser() {
 }
 
 export const getServerSideProps = function ({ req, res }) {
-  if (!req.session.User.Permissions.split(',').includes('khoa_tk')) {
+  if (!req.session.User.Permissions.split(',').includes('lock_user')) {
     return {
       redirect: {
         permanent: false,

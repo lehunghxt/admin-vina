@@ -2,8 +2,7 @@ const sequelizeSVA = require('./DAL/index').sequelizeSVA;
 const _Log_Action = require('./DAL/Log_Action');
 const LogActionModel = _Log_Action(sequelizeSVA);
 
-
-export const StoreAction = async (data) => {
+module.exports.StoreAction = async (data) => {
     return new Promise(async(res, rej) => {
         await LogActionModel.build({
             ActionCode : data.ActionCode,

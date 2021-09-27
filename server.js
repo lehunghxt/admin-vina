@@ -11,6 +11,7 @@ const handle = nextApp.getRequestHandler();
 const session = require("express-session");
 const redirectLoop = require("express-redirect-loop");
 const {WriteFile, ReadFile} = require("./Helper/FileHelper");
+const {LogActionKickUser, LogActionBlockUser} = require("./Helper/LogAction");
 
 const sessionMidlleWare = session({
   secret: "VinaCA@123!@#",
@@ -52,24 +53,26 @@ io.on("connection", (socket) => {
     }
       break;
   }
-
   console.log("We have a new connection!!!");
-  socket.on("lockcustomer", async (taxcode) => {
+  socket.on("lockcustomer", async ({taxcode, User}) => {
     try {
-      console.log("server da nghe duoc");
-      var data = await ReadFile("taxcodes.txt", "utf-8");
-      var taxcodes = data ? data.split(",") : [];
-      if (!taxcodes.includes(taxcode)) {
-        taxcodes.push(taxcode);
-        //Ghi log tại đây
-        await WriteFile("taxcodes.txt", taxcodes.join(","));
-        io.emit("lockcustomer", taxcode);
-      } else io.emit("lockcustomer", taxcode);
+        await LogActionBlockUser(User, taxcode);//LogAction
+        var data = await ReadFile("taxcodes.txt", "utf-8");
+        var taxcodes = data ? data.split(",") : [];
+        if (!taxcodes.includes(taxcode)) {
+            taxcodes.push(taxcode);
+            await WriteFile("taxcodes.txt", taxcodes.join(","));
+            io.emit("lockcustomer", taxcode);
+        } else 
+            io.emit("lockcustomer", taxcode);
     } catch (error) {
+        console.log('=========================');
+        console.log(error);
+        console.log('=========================');
         socket.emit("error", 'Đã có lỗi xảy ra.');
     }
   });
-  socket.on("lockuser", async (taxcode) => {
+  socket.on("lockuser", async ({taxcode, User}) => {
     try {
         const {GetIdLockUser} = require('./Controller/UserController');
         var data = await GetIdLockUser(taxcode);
@@ -78,9 +81,9 @@ io.on("connection", (socket) => {
             thisids = thisids.join(",");
             var ids = await ReadFile("ids.txt", "utf-8");
             var ids = ids ? ids.split(",") : [];
+            await LogActionKickUser(User, thisids);//LogAction
             if (!ids.includes(thisids)) {
                 ids.push(thisids);
-                //Ghi log tại đây
                 await WriteFile("ids.txt", ids.join(","));
                 io.emit("lockuser", thisids);
             } else io.emit("lockuser", thisids);

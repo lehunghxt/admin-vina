@@ -1,8 +1,10 @@
 import React from 'react'
 import { useState } from "react";
 import Swal from "sweetalert2";
+import { useUser } from 'Provider/UserProvider';
 
 export default function ChangeData({ socket }) {
+    const { User } = useUser();
     const [taxcode, setTaxcode] = useState("");
     socket.on("lockcustomer", (taxcode) => {
       Swal.fire({
@@ -16,7 +18,6 @@ export default function ChangeData({ socket }) {
       });
     });
     const handleOk = () => {
-      console.log("Handle ok click !!", taxcode);
       if (!socket) return;
       if(taxcode.trim() == ''){
           Swal.fire({
@@ -28,7 +29,7 @@ export default function ChangeData({ socket }) {
           })
           return;
       }
-      socket.emit("lockcustomer", taxcode);
+      socket.emit("lockcustomer", ({taxcode, User}));
     };
     const handleUnlock = () => {
       console.log("Handle Unlock!!", taxcode);
