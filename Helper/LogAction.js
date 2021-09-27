@@ -32,15 +32,18 @@ module.exports.LogActionBlockUser = async (CurrentUser, TaxCode) => {
     }
     await LogModel.StoreAction(data);
 }
-module.exports.LogActionCancleInvoice = async (Invoices, CurrentUser) => {
-    const preJson = [];
-    Invoices.forEach(async inv => {
-        preJson.push({
-            Customer : inv.TaxCode,
-            InvoiceNumber : inv.InvoiceNumber,
-            IvoiceCode : inv.IvoiceCode,
+module.exports.LogActionCancleInvoice = async (Invoices, CurrentUser, Customers) => {
+    const arrJson = [];
+    for(var i = 0; i < Invoices.length; i++){
+        arrJson.push({
+            InvoiceNumber : Invoices[i].InvoiceNumber,
+            IvoiceCode : Invoices[i].IvoiceCode,
         });
-    });
+    }
+    const preJson = {
+        customer : Customers.Taxcode,
+        info : arrJson
+    }
     const data = {
         ActionCode : ACTION_CANCEL_INVOICE,
         Status : 1,

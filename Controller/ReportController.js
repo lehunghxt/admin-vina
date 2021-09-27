@@ -531,22 +531,21 @@ const GetTaxReportData = async (Customers, FromDate, ToDate, ReportType, Current
           const ListNotSigned = InvoicesByNotice.filter(e => e.InvoiceNumber < lastSignedInvoiceInList.InvoiceNumber && e.Status === 1);
           if (ListNotSigned && ListNotSigned.length > 0) {
             var ListNeedUpdate = [];
-            ListNotSigned.forEach(async e => {
-              var invoice = invoices.find(i => i.Id == e.Id);
-              if (!({ IvoiceCode } = invoice))
-                invoice.IvoiceCode = await GetInvoiceCode();
-              invoice.Status = 5;
-              invoice.DateofSign = invoice.DateofInvoice;
+            for(var inv = 0; inv < ListNotSigned.length; inv++){
+                var thisInv = ListNotSigned[inv];
+                var invoice = await invoices.find(i => i.Id == thisInv.Id);
+                if (!invoice.IvoiceCode){
+                    invoice.IvoiceCode = await GetInvoiceCode();
+                }
+                invoice.Status = 5;
+                invoice.DateofSign = invoice.DateofInvoice;
 
-              ListNeedUpdate.push(invoice);
-              //Update result
-              InvoicesByNotice[InvoicesByNotice.findIndex(e => e.Id == invoice.Id)] = invoice;
-              invoices[invoices.findIndex(e => e.Id == invoice.Id)] = invoice;
-            });
-            console.log('======================================');
-            console.log(ListNeedUpdate);
-            //await LogActionCancleInvoice(ListNeedUpdate, CurrentUser)
-            console.log('======================================');
+                ListNeedUpdate.push(invoice);
+                //Update result
+                InvoicesByNotice[InvoicesByNotice.findIndex( e => e.Id == invoice.Id)] = invoice;
+                invoices[invoices.findIndex(e => e.Id == invoice.Id)] = invoice;
+            }
+            await LogActionCancleInvoice(ListNeedUpdate, CurrentUser, customer)
             //await VoidNotSignedInvoices(ListNeedUpdate, customer.Id);
           }
         }
