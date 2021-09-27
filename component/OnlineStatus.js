@@ -28,8 +28,6 @@ function OnlineStatus() {
     }, [socket]);
     if (socket)
         socket.on('ClientCount', count => {
-            console.log(count)
-            console.log(data)
             dispatch({ type: "Change", value: count })
         });
     return (

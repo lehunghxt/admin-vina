@@ -8,8 +8,8 @@ import { useLoading } from '../../Provider/LoadingProvider';
 function Phutho() {
     const { show, hide } = useLoading();
 
-    const { User } = useUser();
-    const [query, setQuery] = useState({ provinceid: '26' })
+    const { CurrentUser } = useUser();
+    const [query, setQuery] = useState({ provinceid: '26', action: "Phutho" })
     const [taxcodes, setTaxcodes] = useState([])
     const [searchtaxcodes, setSearchtaxcodes] = useState([])
     const [taxcode, setTaxcode] = useState('')
@@ -88,10 +88,6 @@ function Phutho() {
         try {
             e.preventDefault();
             show();
-            if (User.UserType !== 1 && !query.taxcode) {
-                alert("Vui lòng nhập mã số thuế");
-                return false;
-            }
             if (!query.fromdate || !query.todate) {
                 alert("Ngày không hợp lệ");
                 return false;
@@ -115,17 +111,13 @@ function Phutho() {
         try {
             show();
             e.preventDefault();
-            if (User.UserType !== 1 && !query.taxcode) {
-                alert("Vui lòng nhập mã số thuế");
-                return false;
-            }
             if (!query.fromdate || !query.todate) {
                 alert("Ngày không hợp lệ");
                 return false;
             }
             query.type = type;
             query.customers = searchtaxcodes;
-            var data = await Post('taxreport', { params: query, responseType: 'blob' });
+            var data = await Post('taxreport', { params: query });
             if (data.error) {
                 alert(data.error);
                 return false;

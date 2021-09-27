@@ -40,6 +40,15 @@ module.exports = sequelize => {
       comment: null,
       field: "Password"
     },
+    Email: {
+      type: DataTypes.STRING(200),
+      allowNull: false,
+      defaultValue: null,
+      primaryKey: false,
+      autoIncrement: false,
+      comment: null,
+      field: "Email"
+    },
     Status: {
       type: DataTypes.INTEGER,
       allowNull: false,

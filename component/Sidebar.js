@@ -1,8 +1,12 @@
 import React from "react";
 import Link from "next/link";
-import { useUser } from "Provider/UserProvider";
-export default function Sidebar() {
-  const { User } = useUser();
+export default function Sidebar({ User }) {
+  const pages = [
+    { id: 1, href: "/", icon: "fas fa-fw fa-tachometer-alt", title: "Trang chủ", perr: [] },
+    { id: 2, href: "/users", icon: "fa fa-users", title: "Danh sách tài khoản", perr: ["create_account", "grant_permissions", "edit_account"] },
+    { id: 3, href: "/lockuser", icon: "fa fa-lock", title: "Khóa/Reset khách hàng", perr: ["lock_user"] },
+    { id: 4, href: "/taxreport", icon: "fa fa-book", title: "Báo cáo thuế", perr: ["hn_report"] },
+  ]
   return (
     <>
       <ul
@@ -18,30 +22,16 @@ export default function Sidebar() {
           </a>
         </Link>
         <hr className="sidebar-divider my-0" />
-        <li className="nav-item">
-          <Link href="/" passHref={true}>
-            <a className="nav-link">
-              <i className="fas fa-fw fa-tachometer-alt"></i>
-              <span>Dashboard</span>
-            </a>
-          </Link>
-        </li>
-        <li className="nav-item">
-          <Link href="/lockuser" passHref={true}>
-            <a className="nav-link">
-              <i className="fa fa-lock"></i>
-              <span>Khóa/Reset tài khoản</span>
-            </a>
-          </Link>
-        </li>
-        <li className="nav-item">
-          <Link href="/taxreport" passHref={true}>
-            <a className="nav-link">
-              <i className="fa fa-book"></i>
-              <span>Báo cáo thuế</span>
-            </a>
-          </Link>
-        </li>
+        {pages.map(e => (e.perr.some(p => User.Permissions.includes(p)) || e.perr.length < 1) ?
+          <li className="nav-item" key={e.id}>
+            <Link href={e.href} passHref={true}>
+              <a className="nav-link">
+                <i className={e.icon}></i>
+                <span>{e.title}</span>
+              </a>
+            </Link>
+          </li> : <></>
+        )}
         <hr className="sidebar-divider" />
       </ul>
     </>

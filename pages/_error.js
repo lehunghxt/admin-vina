@@ -4,8 +4,10 @@ function Error({ statusCode }) {
             {statusCode === 404 ?
                 `Page not found` :
                 statusCode === 401
-                    ? `Unauthorized`
-                    : 'An error occurred on client'
+                    ? `Unauthorized` :
+                    statusCode === 403
+                        ? `Forbidden`
+                        : 'An error occurred on client'
             }
         </>
     )

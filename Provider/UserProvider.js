@@ -6,7 +6,7 @@ export const useUser = () => {
 };
 const UserProvider = ({ children, User }) => {
     const value = {
-        User,
+        CurrentUser: User,
     };
     return User ? (
         <UserContext.Provider value={value}>{children}</UserContext.Provider>

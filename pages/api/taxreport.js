@@ -66,10 +66,7 @@ async function Post(req, res, next) {
                 }
                 return res.json(response);
             }
-            default:
-                break;
         }
-
     } catch (error) {
         console.log(error)
         res.status(500).send();

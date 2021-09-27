@@ -28,20 +28,22 @@ async function Get(req, res, next) {
 
 async function Post(req, res, next) {
     const { username, password } = req.body;
-    var user = await CheckLogin(username, password);
-    console.log(user)
-    if (user) {
-        var roles = await GetUserRoleById(user.Id);
-        console.log(roles)
-        if (roles && roles.length > 0) {
-            user.Roles = roles;
-            user.Password = undefined;
-            req.session.User = user;
-            req.session.save();
-            return res.json(user)
+    try {
+        var user = await CheckLogin(username, password);
+        if (user) {
+            var roles = await GetUserRoleById(user.Id);
+            if (roles && roles.length > 0) {
+                user.Permissions = roles;
+                user.Password = undefined;
+                req.session.User = user;
+                req.session.save();
+                return res.json(user)
+            }
         }
+        return res.json(null);
+    } catch (error) {
+        return res.status(500);
     }
-    return res.json(null);
 }
 
 async function Put(req, res, next) {
@@ -53,7 +55,8 @@ async function Patch(req, res, next) {
 }
 
 async function Delete(req, res, next) {
-    NotSuported(req, res);
+    await req.session.destroy();
+    return res.status(200).send();
 }
 
 async function NotSuported(req, res) {

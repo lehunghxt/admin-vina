@@ -10,6 +10,9 @@
             ],
             "@Component/*": [
                 "component/*"
+            ],
+            "@Provider/*": [
+                "Provider/*"
             ]
         }
     },

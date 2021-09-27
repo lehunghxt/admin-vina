@@ -8,7 +8,7 @@ import { useLoading } from '../../Provider/LoadingProvider';
 function Hanoi() {
     const { show, hide } = useLoading();
 
-    const { User } = useUser();
+    const { CurrentUser } = useUser();
     const [query, setQuery] = useState({ provinceid: '03', action: "Hanoi" })
     const [taxcodes, setTaxcodes] = useState([])
     const [searchtaxcodes, setSearchtaxcodes] = useState([])
