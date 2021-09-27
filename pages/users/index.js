@@ -53,69 +53,27 @@ const ListUser = () => {
           {CurrentUser.Permissions.includes("create_account") ?
 
             <Link href="/users/user" passHref={true}>
-              <button type="button" className="btn btn-primary">
-                <i className="fa fa-plus pointer">Tạo mới</i>
+              <button type="button" className="btn btn-primary btn-sm">
+                <i className="fa fa-plus pointer"></i>
+                Tạo mới
               </button>
             </Link>
             : null}
         </div>
         <div className="card-body">
           <div className="table-responsive">
-            <div
-              id="dataTable_wrapper"
-              className="dataTables_wrapper dt-bootstrap4"
-            >
               <table
-                className="table table-bordered table-sm dataTable"
-                id="dataTable"
+                className="table table-bordered table-sm"
                 width="100%"
                 cellSpacing="0"
                 role="grid"
-                aria-describedby="dataTable_info"
               >
-                <thead>
-                  <tr role="row">
-                    <th
-                      className="sorting_asc"
-                      tabIndex="0"
-                      aria-controls="dataTable"
-                      rowSpan="1"
-                      colSpan="1"
-                      aria-sort="ascending"
-                      aria-label="Name: activate to sort column descending"
-                    >
-                      Họ và tên
-                    </th>
-                    <th
-                      className="sorting"
-                      tabIndex="0"
-                      aria-controls="dataTable"
-                      rowSpan="1"
-                      colSpan="1"
-                      aria-label="Position: activate to sort column ascending"
-                    >
-                      Tên đăng nhập
-                    </th>
-                    <th
-                      className="sorting"
-                      tabIndex="0"
-                      aria-controls="dataTable"
-                      rowSpan="1"
-                      colSpan="1"
-                      aria-label="Office: activate to sort column ascending"
-                    >
-                      Email
-                    </th>
-                    <th
-                      className="sorting"
-                      tabIndex="0"
-                      aria-controls="dataTable"
-                      rowSpan="1"
-                      colSpan="1"
-                      aria-label="Office: activate to sort column ascending"
-                    >
-                      Trạng thái
-                    </th>
+                <thead className='thead-dark'>
+                  <tr className='text-center'>
+                    <th>Họ và tên</th>
+                    <th>Tên đăng nhập</th>
+                    <th>Email</th>
+                    <th>Trạng thái</th>
                     <th>Chọn</th>
                   </tr>
                 </thead>
@@ -123,20 +81,42 @@ const ListUser = () => {
                   {Users && Users.length > 0 ? Users.map((e, index) =>
                     <tr key={e.Id} role="row" className={index % 2 == 0 ? "odd" : "even"}>
                       <td>{e.FullName}</td>
-                      <td>{e.UserName}</td>
+                      <td className='text-center'>{e.UserName}</td>
                       <td>{e.Email}</td>
-                      <td>{e.Status === 1 ? "Hoạt động" : "Đã khóa"}</td>
-                      <td>{CurrentUser.Permissions.includes("edit_account") || CurrentUser.Permissions.includes("grant_permissions") ?
-                        <Link href={`/users/user/${e.Id}`} passHref={true}><i className="fa fa-paint-brush pointer"></i></Link>
+                      <td className='text-center'>{e.Status === 1 ? "Hoạt động" : "Đã khóa"}</td>
+                      <td className='d-flex justify-content-center'>
+                          {CurrentUser.Permissions.includes("edit_account") || CurrentUser.Permissions.includes("grant_permissions") ?
+                            <Link href={`/users/user/${e.Id}`} passHref={true}>
+                                <a className='text-warning' title='Edit' >
+                                    <i className="fa fa-paint-brush pointer"></i>
+                                </a>
+                            </Link> 
+                            : null}
+                        {e.Status === 1 ? 
+                            <Link href='#' onClick={() => UpdateStatus(e.Id, 2)}>
+                                <a className='text-dark' title='Lock Account' >
+                                    <i className="fa fa-lock pointer"></i> 
+                                </a>
+                            </Link> 
+                        : 
+                            <Link href='#' onClick={() => UpdateStatus(e.Id, 1)}>
+                                <a className='text-success' title='Unlock Account'>
+                                    <i title='Unlock Account' className="fa fa-unlock pointer" ></i>
+                                </a>
+                            </Link> 
+                        }
+                        {CurrentUser.Permissions.includes("delete_account") ?
+                            <Link href='#'onClick={() => DeleteAccount(e.Id)}>
+                                <a className='text-danger' title='Delete Account'>
+                                    <i className="fa fa-trash pointer" ></i>
+                                </a>
+                            </Link> 
                         : null}
-                        {e.Status === 1 ? <i className="fa fa-lock pointer" onClick={() => UpdateStatus(e.Id, 2)}></i> : <i className="fa fa-unlock pointer" onClick={() => UpdateStatus(e.Id, 1)}></i>}
-                        {CurrentUser.Permissions.includes("delete_account") ? <i className="fa fa-trash pointer" onClick={() => DeleteAccount(e.Id)}></i> : null}
                       </td>
                     </tr>
                   ) : null}
                 </tbody>
               </table>
-            </div>
           </div>
         </div>
       </div>

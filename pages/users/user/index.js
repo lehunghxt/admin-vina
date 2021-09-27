@@ -71,14 +71,14 @@ const User = ({ Permissions }) => {
                 <title>Tạo tài khoản</title>
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-            <div className="card">
+            <div className="card shadow">
                 <div className="card-header">
                     <h3>Tạo mới tài khoản</h3>
                 </div>
                 <div className="card-body" style={{ pointerEvents: CurrentUser.Permissions.includes("create_account") ? "all" : "none" }}>
                     <form onSubmit={handleSubmit}>
-                        <div style={{ display: "grid", gridTemplateColumns: "40% 60%" }}>
-                            <div>
+                        <div className='row'>
+                            <div className='col-xs-12 col-sm-12 col-md-4'>
                                 <div className="form-group">
                                     <label>
                                         <b>Tên đăng nhập</b>
@@ -87,7 +87,7 @@ const User = ({ Permissions }) => {
                                         type="text"
                                         name="UserName"
                                         id="UserName"
-                                        className="form-control"
+                                        className="form-control form-control-sm"
                                         value={user.UserName}
                                         onInput={handleInput}
                                         required
@@ -101,7 +101,7 @@ const User = ({ Permissions }) => {
                                         type="text"
                                         name="FullName"
                                         id="FullName"
-                                        className="form-control"
+                                        className="form-control form-control-sm"
                                         value={user.FullName}
                                         onInput={handleInput}
                                         required
@@ -115,7 +115,7 @@ const User = ({ Permissions }) => {
                                         type="text"
                                         name="Email"
                                         id="Email"
-                                        className="form-control"
+                                        className="form-control form-control-sm"
                                         value={user.Email}
                                         onInput={handleInput}
                                         required
@@ -126,9 +126,9 @@ const User = ({ Permissions }) => {
                                         <b>Mật khẩu</b>
                                     </label>
                                     <div className="input-group">
-                                        <input type={hidePass ? "password" : "text"} className="form-control" name="Password" id="Password" value={user.Password} onInput={handleInput} />
+                                        <input type={hidePass ? "password" : "text"} className="form-control form-control-sm" name="Password" id="Password" value={user.Password} onInput={handleInput} />
                                         <div className="input-group-append">
-                                            <button className="btn btn-primary" type="button" onClick={() => setHidePass(!hidePass)}>
+                                            <button className="btn btn-primary btn-sm" type="button" onClick={() => setHidePass(!hidePass)}>
                                                 <i className={hidePass ? "fa fa-eye-slash" : "fa fa-eye"}></i>
                                             </button>
                                         </div>
@@ -139,38 +139,41 @@ const User = ({ Permissions }) => {
                                         <b>Xác nhận mật khẩu</b>
                                     </label>
                                     <div className="input-group">
-                                        <input type={hideConfirmPass ? "password" : "text"} value={user.ConfirmPassword} className="form-control" name="ConfirmPassword" id="ConfirmPassword" onInput={handleInput} />
+                                        <input type={hideConfirmPass ? "password" : "text"} value={user.ConfirmPassword} className="form-control form-control-sm" name="ConfirmPassword" id="ConfirmPassword" onInput={handleInput} />
                                         <div className="input-group-append">
-                                            <button className="btn btn-primary" type="button" onClick={() => setHideConfirmPass(!hideConfirmPass)}>
+                                            <button className="btn btn-primary btn-sm" type="button" onClick={() => setHideConfirmPass(!hideConfirmPass)}>
                                                 <i className={hideConfirmPass ? "fa fa-eye-slash" : "fa fa-eye"}></i>
                                             </button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div className="ml-3" style={{ pointerEvents: CurrentUser.Permissions.includes("grant_permissions") ? "all" : "none" }}>
+                            <div className="col-xs-12 col-sm-12 col-md-8" style={{ pointerEvents: CurrentUser.Permissions.includes("grant_permissions") ? "all" : "none" }}>
                                 <i className={`d-block pointer ${collapse ? "collapsed" : ""}`} onClick={() => setCollapse(!collapse)}>
                                     <h6 className="m-0 font-weight-bold">Danh sách quyền</h6>
                                 </i>
-                                <div className={`collapse ${collapse ? "" : "show"}`}>
-                                    <div className="card-body">
-                                        <div className="card-body" style={{
-                                            display: "grid", gridTemplateColumns: "auto auto auto auto"
-                                        }}>
-                                            {Permissions.map(e =>
-                                                <div key={e.Code} className="row">
-                                                    <div><label htmlFor={e.Code}>{e.Description}</label></div>
-                                                    &nbsp;
-                                                    <div><input id={e.Code} onChange={handleInputChange} type="checkbox" value={e.Code} /></div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
+                                <div className={`collapse row ${collapse ? "" : "show"}`}>
+                                        {Permissions.map(e =>
+                                            <div key={e.Code} className="col-xs-12 col-sm-12 col-md-4">
+                                                <table className='table table-sm'>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td className='text-left'>
+                                                                <label style={{ cursor:"pointer" }} htmlFor={e.Code}>{e.Description}</label>
+                                                            </td>
+                                                            <td className='text-right'>
+                                                                <input id={e.Code} onChange={handleInputChange} type="checkbox" value={e.Code} />
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
                                 </div>
                             </div>
                         </div>
-                        <button type="submit" className="btn btn-primary">Lưu</button>
-                        <button type="button" className="btn btn-secondary" onClick={() => router.back()}>Quay về</button>
+                        <button type="submit" className="btn btn-primary btn-sm mr-2">Lưu</button>
+                        <button type="button" className="btn btn-secondary btn-sm" onClick={() => router.back()}>Quay về</button>
                     </form>
                 </div>
             </div>

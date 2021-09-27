@@ -6,17 +6,19 @@ import { useUser } from 'Provider/UserProvider';
 export default function ResetAccount({ socket }) {
     const { User } = useUser();
     const [taxcode, setTaxcode] = useState("");
-    socket.on("lockuser", (taxcode) => {
-      Swal.fire({
-        title: "Thành công",
-        icon: "success",
-        html: `Đã thêm mã số thuế ${taxcode} vào danh sách`,
-        confirmButtonColor: "#3085d6",
-        confirmButtonText: "Ok",
-      }).then((result) => {
-        setTaxcode("");
-      });
-    });
+    if(socket){
+        socket.on("lockuser", (taxcode) => {
+          Swal.fire({
+            title: "Thành công",
+            icon: "success",
+            html: `Đã thêm mã số thuế ${taxcode} vào danh sách`,
+            confirmButtonColor: "#3085d6",
+            confirmButtonText: "Ok",
+          }).then((result) => {
+            setTaxcode("");
+          });
+        });
+    }
     const handleResetClick = () => {
       console.log("Handle Reset Clicked");
       if (!socket) return;

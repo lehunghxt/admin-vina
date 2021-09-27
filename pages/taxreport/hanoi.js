@@ -146,7 +146,7 @@ function Hanoi() {
                 <title>Báo cáo Hà Nội</title>
                 <link rel="icon" href="/logo.ico" />
             </Head>
-            <div className="card">
+            <div className="card shadow">
                 <form onSubmit={e => handleSubmit(e, 1)}>
                     <div className="card-body d-flex">
                         <div className="col-md-3">
@@ -205,7 +205,7 @@ function Hanoi() {
                 </form>
             </div>
             <hr />
-            <div className="card">
+            <div className="card shadow">
                 <div className="card-header d-flex justify-content-end">
                     <label><input type="search" onChange={handleSearch} value={taxcode} className="form-controll" />&nbsp;Tìm <i className="fa fa-search"></i></label>
                 </div>
