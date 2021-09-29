@@ -6,6 +6,7 @@ export default function Sidebar({ User }) {
     { id: 2, href: "/users", icon: "fa fa-users", title: "Danh sách tài khoản", perr: ["create_account", "grant_permissions", "edit_account"] },
     { id: 3, href: "/lockuser", icon: "fa fa-lock", title: "Khóa/Reset khách hàng", perr: ["lock_user"] },
     { id: 4, href: "/taxreport", icon: "fa fa-book", title: "Báo cáo thuế", perr: ["hn_report"] },
+    { id: 5, href: "/log", icon: "fa fa-history", title: "Báo cáo thuế", perr: [] },
   ]
   return (
     <>
@@ -24,7 +25,7 @@ export default function Sidebar({ User }) {
         <hr className="sidebar-divider my-0" />
         {pages.map(e => (e.perr.some(p => User.Permissions.includes(p)) || e.perr.length < 1) ?
           <li className="nav-item" key={e.id}>
-            <Link href={e.href} passHref={true}>
+            <Link href={e.href} passHref={false}>
               <a className="nav-link">
                 <i className={e.icon}></i>
                 <span>{e.title}</span>

@@ -13,9 +13,10 @@ function Error({ statusCode }) {
     )
 }
 
-Error.getInitialProps = ({ res, err }) => {
-    const statusCode = res ? res.statusCode : err ? err.statusCode : 404
-    return { statusCode }
+Error.getInitialProps = ({ query, res, err }) => {
+    let statusCode = res ? res.statusCode : err ? err.statusCode : 404;
+    if (req.path)
+        return { statusCode }
 }
 
 export default Error

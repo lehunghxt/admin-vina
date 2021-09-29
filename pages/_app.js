@@ -6,6 +6,7 @@ import Layout from "../component/Layout";
 import UserProvider from "../Provider/UserProvider";
 import SocketProvider from "../Provider/SocketProvider";
 import LoadingProvider from "../Provider/LoadingProvider";
+import ErrorBoundary from "@Component/ErrorBoundary";
 
 
 function MyApp({ Component, pageProps, User }) {
@@ -13,7 +14,7 @@ function MyApp({ Component, pageProps, User }) {
   return router.pathname == "/auth" ? (
     <Component {...pageProps} />
   ) : (
-    <>
+    <ErrorBoundary>
       <LoadingProvider>
         <UserProvider User={User}>
           <SocketProvider>
@@ -23,7 +24,7 @@ function MyApp({ Component, pageProps, User }) {
           </SocketProvider>
         </UserProvider>
       </LoadingProvider>
-    </>
+    </ErrorBoundary>
   );
 }
 
