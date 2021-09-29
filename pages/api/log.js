@@ -28,7 +28,7 @@ async function Get(req, res, next) {
         var data = await GetLog(fromdate, todate, type, page);
         return res.json(data);
     } catch (error) {
-        console.log(data);
+        console.log(error);
         return res.status(500).send();
     }
 }

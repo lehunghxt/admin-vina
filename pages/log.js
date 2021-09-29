@@ -13,6 +13,9 @@ const Log = () => {
         //     const element = JSON.parse(res[0].JSON)
 
         // }
+        console.log('=========================');
+        console.log(res);
+        console.log('=========================');
         if (res) setData(JSON.parse(res[0].JSON))
     }
     const handleInputChange = e => {
@@ -29,54 +32,61 @@ const Log = () => {
                     <h5>Xem lịch sử</h5>
                 </div>
                 <form onSubmit={handleSubmit}>
-                    <div className="card-body d-flex">
-                        <div className="col-md-4">
-                            <label>
-                                <b>Từ ngày</b>
-                            </label>
-                            <input
-                                type="date"
-                                name="fromdate"
-                                id="fromdate"
-                                className="form-control"
-                                value={query.fromdate}
-                                onChange={handleInputChange}
-                            />
+                    <div className="card-body">
+                        <div className='row'>
+                            <div className="col-md-4">
+                                <label>
+                                    <b>Từ ngày</b>
+                                </label>
+                                <input
+                                    type="date"
+                                    name="fromdate"
+                                    id="fromdate"
+                                    className="form-control form-control-sm"
+                                    value={query.fromdate}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+                            <div className="col-md-4">
+                                <label>
+                                    <b>Tới ngày</b>
+                                </label>
+                                <input
+                                    type="date"
+                                    name="todate"
+                                    id="todate"
+                                    className="form-control form-control-sm"
+                                    value={query.todate}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+                            <div className="col-md-4">
+                                <label>
+                                    <b>Loại</b>
+                                </label>
+                                <select className="form-control form-control-sm" id="type" name="type" onChange={handleInputChange}>
+                                    <option value="1">Hủy hóa đơn</option>
+                                    <option value="2">Reset tài khoản</option>
+                                    <option value="3">Khóa tài khoản</option>
+                                </select>
+                            </div>
                         </div>
-                        <div className="col-md-4">
-                            <label>
-                                <b>Tới ngày</b>
-                            </label>
-                            <input
-                                type="date"
-                                name="todate"
-                                id="todate"
-                                className="form-control"
-                                value={query.todate}
-                                onChange={handleInputChange}
-                            />
-                        </div>
-                        <div className="col-md-4">
-                            <label>
-                                <b>Loại</b>
-                            </label>
-                            <select className="form-control" id="type" name="type" onChange={handleInputChange}>
-                                <option value="1">Hủy hóa đơn</option>
-                                <option value="2">Reset tài khoản</option>
-                                <option value="3">Khóa tài khoản</option>
-                            </select>
+                        <div className='row mt-2'>
+                            <div className='col-md-12'>
+                                <button className="btn btn-sm btn-primary">Tìm kiếm</button>
+                            </div>
                         </div>
                     </div>
-                    <div className="card-footer">
-                        <button className="btn btn-primary">Tìm kiếm</button>
-                    </div>
-                </form><hr />
-                <div className="card-body">
-                    <DisplayLog data={data} type={query.type} />
-                </div>
+                </form>
             </div>
+   
+            <DisplayLog data={data} type={query.type} />
         </>
     )
 }
-
+export const getServerSideProps = function () {
+    return {
+      props: {},
+    };
+  };
 export default Log
