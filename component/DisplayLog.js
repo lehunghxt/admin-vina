@@ -5,11 +5,13 @@ const DisplayLog = ({ data, type }) => {
     if (!data || data.length < 1) return null
     if (!Array.isArray(data)) data = [data];
         
-    switch (type) {
+    switch (parseInt(type)) {
         case 1:
             return <LogType1 data={data} />
         case 2:
             return <LogType2 data={data} />
+        case 3:
+            return <LogType3 data={data} />
         default: return null
     }
 }
@@ -97,6 +99,46 @@ const LogType2 = ({ data }) => {
                                     <td className='text-center'>{e.UserName}</td>
                                     <td className='text-center'><Moment format="DD/MM/YYYY">{e.CreateDate}</Moment></td>
                                     <td className='text-center'>{e.customerIds}</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    )
+}
+const LogType3 = ({ data }) => {
+    var processData = [];
+    for(var i = 0; i <  data.length; i ++){
+        const details = JSON.parse(data[i].JSON);
+        processData.push({
+            UserName : data[i].AccountModel.UserName,
+            CreateDate : data[i].CreateDate,
+            TaxCode : details.TaxCode,
+        })
+    }
+    return (
+        <div className='card shadow mt-2'>
+            <div className='card-body'>
+                <div className="table-responsive">
+                    <table className="table table-bordered table-sm">
+                        <thead>
+                            <tr>
+                                <th className='text-center'>STT</th>
+                                <th className='text-center'>Người thực hiện</th>
+                                <th className='text-center'>Thời gian thực hiện</th>
+                                <th className='text-center'>MST</th>
+                            </tr>
+                            
+                        </thead>
+                        <tbody>
+                            {processData.map((e, index) =>
+                                <tr key={index} role="row" className={index % 2 == 0 ? "odd" : "even"}>
+                                    <td className='text-center'>{(index + 1)}</td>
+                                    <td className='text-center'>{e.UserName}</td>
+                                    <td className='text-center'><Moment format="DD/MM/YYYY">{e.CreateDate}</Moment></td>
+                                    <td className='text-center'>{e.TaxCode}</td>
                                 </tr>
                             )}
                         </tbody>
