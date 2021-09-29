@@ -9,14 +9,7 @@ const Log = () => {
     const handleSubmit = async e => {
         e.preventDefault();
         var res = await Get('/log', { params: query });
-        // for (let i = 0; i < array.length; i++) {
-        //     const element = JSON.parse(res[0].JSON)
-
-        // }
-        console.log('=========================');
-        console.log(res);
-        console.log('=========================');
-        if (res) setData(JSON.parse(res[0].JSON))
+        if (res) setData(res)
     }
     const handleInputChange = e => {
         setQuery({ ...query, [e.currentTarget.name]: e.currentTarget.value })

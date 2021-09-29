@@ -1,8 +1,10 @@
 import React from 'react'
+import Moment from 'react-moment';
 
 const DisplayLog = ({ data, type }) => {
     if (!data || data.length < 1) return null
     if (!Array.isArray(data)) data = [data];
+        
     switch (type) {
         case 1:
             return <LogType1 data={data} />
@@ -12,6 +14,16 @@ const DisplayLog = ({ data, type }) => {
     }
 }
 const LogType1 = ({ data }) => {
+    var processData = [];
+    for(var i = 0; i <  data.length; i ++){
+        const details = JSON.parse(data[i].JSON);
+        processData.push({
+            UserName : data[i].AccountModel.UserName,
+            CreateDate : data[i].CreateDate,
+            customer : details.customer,
+            info :details.info,
+        })
+    }
     return (
         <div className='card shadow mt-2'>
             <div className='card-body'>
@@ -31,11 +43,11 @@ const LogType1 = ({ data }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {data.map((e, index) =>
+                            {processData.map((e, index) =>
                                 <tr key={e.Id} role="row" className={index % 2 == 0 ? "odd" : "even"}>
                                     <td className='text-center' style={{verticalAlign:'middle'}}>{(index + 1)}</td>
-                                    <td className='text-center' style={{verticalAlign:'middle'}}></td>
-                                    <td className='text-center' style={{verticalAlign:'middle'}}>{e.CreateDate}</td>
+                                    <td className='text-center' style={{verticalAlign:'middle'}}>{e.UserName}</td>
+                                    <td className='text-center' style={{verticalAlign:'middle'}}><Moment format="DD/MM/YYYY">{e.CreateDate}</Moment></td>
                                     <td className='text-center' style={{verticalAlign:'middle'}}>{e.customer}</td>
                                     <td colSpan="2">
                                         {e.info && e.info.length > 0 && e.info.map(i =>
@@ -55,6 +67,15 @@ const LogType1 = ({ data }) => {
     )
 }
 const LogType2 = ({ data }) => {
+    var processData = [];
+    for(var i = 0; i <  data.length; i ++){
+        const details = JSON.parse(data[i].JSON);
+        processData.push({
+            UserName : data[i].AccountModel.UserName,
+            CreateDate : data[i].CreateDate,
+            customerIds : details.customerIds,
+        })
+    }
     return (
         <div className='card shadow mt-2'>
             <div className='card-body'>
@@ -62,19 +83,20 @@ const LogType2 = ({ data }) => {
                     <table className="table table-bordered table-sm">
                         <thead>
                             <tr>
-                                <th className='text-center' style={{verticalAlign:'middle'}}>STT</th>
-                                <th className='text-center' style={{verticalAlign:'middle'}}>Người thực hiện</th>
-                                <th className='text-center' style={{verticalAlign:'middle'}}>Thời thực hiện</th>
-                                <th className='text-center' style={{verticalAlign:'middle'}}>ID người dùng</th>
+                                <th className='text-center'>STT</th>
+                                <th className='text-center'>Người thực hiện</th>
+                                <th className='text-center'>Thời gian thực hiện</th>
+                                <th className='text-center'>ID khách hàng</th>
                             </tr>
+                            
                         </thead>
                         <tbody>
-                            {data.map((e, index) =>
-                                <tr key={e.Id} role="row" className={index % 2 == 0 ? "odd" : "even"}>
-                                    <td className='text-center' style={{verticalAlign:'middle'}}>{(index + 1)}</td>
-                                    <td className='text-center' style={{verticalAlign:'middle'}}></td>
-                                    <td className='text-center' style={{verticalAlign:'middle'}}>{e.CreateDate}</td>
-                                    <td className='text-center' style={{verticalAlign:'middle'}}>{e.JSON}</td>
+                            {processData.map((e, index) =>
+                                <tr key={index} role="row" className={index % 2 == 0 ? "odd" : "even"}>
+                                    <td className='text-center'>{(index + 1)}</td>
+                                    <td className='text-center'>{e.UserName}</td>
+                                    <td className='text-center'><Moment format="DD/MM/YYYY">{e.CreateDate}</Moment></td>
+                                    <td className='text-center'>{e.customerIds}</td>
                                 </tr>
                             )}
                         </tbody>

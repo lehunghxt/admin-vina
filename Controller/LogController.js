@@ -3,7 +3,7 @@ const _LogActionModel = require('../Model/DAL/Log_Action');
 const LogActionModel = _LogActionModel(sequelizeSVA);
 
 const _AccountModel = require('../Model/DAL/AccountModel');
-const AccountModel = _LogActionModel(sequelizeSVA);
+const AccountModel = _AccountModel(sequelizeSVA);
 
 AccountModel.hasMany(LogActionModel, { foreignKey: 'UserId' })
 LogActionModel.belongsTo(AccountModel, { foreignKey: 'UserId' })
@@ -20,7 +20,6 @@ module.exports.GetLog = async (fromdate, todate, type, page) => {
                 ActionCode: type
             }]
         },
-        offset,
-        limit: limitPerPage,
+        include : AccountModel, raw:true, nest:true, offset, limit: limitPerPage,
     });
 }
