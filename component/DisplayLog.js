@@ -20,14 +20,24 @@ const DisplayLog = ({ data, type }) => {
 const LogType1 = ({ data }) => {
     var processData = [];
     const ShowListInvoice = list => {
-        const html = <>
-            {list && list.length > 0 && list.map(i =>
-                <ul key={i.IvoiceCode} className='d-flex text-center'>
-                    <li style={{ listStyleType: 'none' }} className='w-50'>{i.InvoiceNumber}</li>
-                    <li style={{ listStyleType: 'none' }} className='w-50'>{i.IvoiceCode}</li>
-                </ul>
-            )}
-        </>
+        const html = <div style={{ maxHeight:'75vh', overflowY:'auto', }}>
+            <table className='table table-sm'>
+                <thead className='thead-dark'>
+                    <tr>
+                        <th>Số hóa đơn</th>
+                        <th>Mã tra cứu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {list && list.length > 0 && list.map(i =>
+                        <tr key={i.IvoiceCode}>
+                            <td>{i.InvoiceNumber}</td>
+                            <td>{i.IvoiceCode}</td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
+        </div>
         MySwal.fire({
             title: "Danh sách hóa đơn hủy",
             html: html,
@@ -51,21 +61,21 @@ const LogType1 = ({ data }) => {
                     <table className="table table-bordered table-sm">
                         <thead>
                             <tr>
-                                <th className='text-center' style={{ verticalAlign: 'middle' }} >STT</th>
-                                <th className='text-center' style={{ verticalAlign: 'middle' }} >Người thực hiện</th>
-                                <th className='text-center' style={{ verticalAlign: 'middle' }} >Thời gian thực hiện</th>
-                                <th className='text-center' style={{ verticalAlign: 'middle' }} >MST</th>
+                                <th className='text-center'>STT</th>
+                                <th className='text-center'>Người thực hiện</th>
+                                <th className='text-center'>Thời gian thực hiện</th>
+                                <th className='text-center'>MST</th>
                                 <th className='text-center' >Xem</th>
                             </tr>
                         </thead>
                         <tbody>
                             {processData.map((e, index) =>
                                 <tr key={e.Id} role="row" className={index % 2 == 0 ? "odd" : "even"}>
-                                    <td className='text-center' style={{ verticalAlign: 'middle' }}>{(index + 1)}</td>
-                                    <td className='text-center' style={{ verticalAlign: 'middle' }}>{e.UserName}</td>
-                                    <td className='text-center' style={{ verticalAlign: 'middle' }}><Moment format="DD/MM/YYYY">{e.CreateDate}</Moment></td>
-                                    <td className='text-center' style={{ verticalAlign: 'middle' }}>{e.customer}</td>
-                                    <td colSpan="2">
+                                    <td className='text-center'>{(index + 1)}</td>
+                                    <td className='text-center'>{e.UserName}</td>
+                                    <td className='text-center'><Moment format="DD/MM/YYYY">{e.CreateDate}</Moment></td>
+                                    <td className='text-center'>{e.customer}</td>
+                                    <td  className='text-center'>
                                         <button className="btn btn-primary btn-sm" type="button" onClick={() => ShowListInvoice(e.info)}>
                                             <i className="fa fa-eye"></i>
                                         </button>
