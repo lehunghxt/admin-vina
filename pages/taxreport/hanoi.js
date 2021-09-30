@@ -3,7 +3,7 @@ import { Get, Post } from '@Helper/ApiHelper'
 import { useCallback, useState } from 'react'
 import { useUser } from 'Provider/UserProvider'
 
-import { useLoading } from '../../Provider/LoadingProvider';
+import { useLoading } from '@Provider/LoadingProvider';
 
 function Hanoi() {
     const { show, hide } = useLoading();

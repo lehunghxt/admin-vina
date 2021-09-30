@@ -1,10 +1,12 @@
-import React from 'react'
+import { useState } from 'react'
 import Moment from 'react-moment';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+const MySwal = withReactContent(Swal);
 
 const DisplayLog = ({ data, type }) => {
     if (!data || data.length < 1) return null
     if (!Array.isArray(data)) data = [data];
-        
     switch (parseInt(type)) {
         case 1:
             return <LogType1 data={data} />
@@ -17,13 +19,29 @@ const DisplayLog = ({ data, type }) => {
 }
 const LogType1 = ({ data }) => {
     var processData = [];
-    for(var i = 0; i <  data.length; i ++){
+    const ShowListInvoice = list => {
+        const html = <>
+            {list && list.length > 0 && list.map(i =>
+                <ul key={i.IvoiceCode} className='d-flex text-center'>
+                    <li style={{ listStyleType: 'none' }} className='w-50'>{i.InvoiceNumber}</li>
+                    <li style={{ listStyleType: 'none' }} className='w-50'>{i.IvoiceCode}</li>
+                </ul>
+            )}
+        </>
+        MySwal.fire({
+            title: "Danh sách hóa đơn hủy",
+            html: html,
+            confirmButtonColor: "#3085d6",
+            confirmButtonText: "Ok",
+        })
+    }
+    for (var i = 0; i < data.length; i++) {
         const details = JSON.parse(data[i].JSON);
         processData.push({
-            UserName : data[i].AccountModel.UserName,
-            CreateDate : data[i].CreateDate,
-            customer : details.customer,
-            info :details.info,
+            UserName: data[i].AccountModel.UserName,
+            CreateDate: data[i].CreateDate,
+            customer: details.customer,
+            info: details.info,
         })
     }
     return (
@@ -33,31 +51,24 @@ const LogType1 = ({ data }) => {
                     <table className="table table-bordered table-sm">
                         <thead>
                             <tr>
-                                <th className='text-center' style={{verticalAlign:'middle'}} rowSpan='2'>STT</th>
-                                <th className='text-center' style={{verticalAlign:'middle'}} rowSpan='2'>Người thực hiện</th>
-                                <th className='text-center' style={{verticalAlign:'middle'}} rowSpan='2'>Thời gian thực hiện</th>
-                                <th className='text-center' style={{verticalAlign:'middle'}} rowSpan='2'>MST</th>
-                                <th className='text-center' colSpan="2">Danh sách hóa đơn</th>
-                            </tr>
-                            <tr>
-                                <th className='text-center'>Số hóa đơn</th>
-                                <th className='text-center'>Mã tra cứu</th>
+                                <th className='text-center' style={{ verticalAlign: 'middle' }} >STT</th>
+                                <th className='text-center' style={{ verticalAlign: 'middle' }} >Người thực hiện</th>
+                                <th className='text-center' style={{ verticalAlign: 'middle' }} >Thời gian thực hiện</th>
+                                <th className='text-center' style={{ verticalAlign: 'middle' }} >MST</th>
+                                <th className='text-center' >Xem</th>
                             </tr>
                         </thead>
                         <tbody>
                             {processData.map((e, index) =>
                                 <tr key={e.Id} role="row" className={index % 2 == 0 ? "odd" : "even"}>
-                                    <td className='text-center' style={{verticalAlign:'middle'}}>{(index + 1)}</td>
-                                    <td className='text-center' style={{verticalAlign:'middle'}}>{e.UserName}</td>
-                                    <td className='text-center' style={{verticalAlign:'middle'}}><Moment format="DD/MM/YYYY">{e.CreateDate}</Moment></td>
-                                    <td className='text-center' style={{verticalAlign:'middle'}}>{e.customer}</td>
+                                    <td className='text-center' style={{ verticalAlign: 'middle' }}>{(index + 1)}</td>
+                                    <td className='text-center' style={{ verticalAlign: 'middle' }}>{e.UserName}</td>
+                                    <td className='text-center' style={{ verticalAlign: 'middle' }}><Moment format="DD/MM/YYYY">{e.CreateDate}</Moment></td>
+                                    <td className='text-center' style={{ verticalAlign: 'middle' }}>{e.customer}</td>
                                     <td colSpan="2">
-                                        {e.info && e.info.length > 0 && e.info.map(i =>
-                                            <ul key={i.IvoiceCode} className='d-flex text-center'>
-                                                <li style={{ listStyleType:'none' }} className='w-50'>{i.InvoiceNumber}</li>
-                                                <li style={{ listStyleType:'none' }} className='w-50'>{i.IvoiceCode}</li>
-                                            </ul>
-                                        )}
+                                        <button className="btn btn-primary btn-sm" type="button" onClick={() => ShowListInvoice(e.info)}>
+                                            <i className="fa fa-eye"></i>
+                                        </button>
                                     </td>
                                 </tr>
                             )}
@@ -70,12 +81,12 @@ const LogType1 = ({ data }) => {
 }
 const LogType2 = ({ data }) => {
     var processData = [];
-    for(var i = 0; i <  data.length; i ++){
+    for (var i = 0; i < data.length; i++) {
         const details = JSON.parse(data[i].JSON);
         processData.push({
-            UserName : data[i].AccountModel.UserName,
-            CreateDate : data[i].CreateDate,
-            customerIds : details.customerIds,
+            UserName: data[i].AccountModel.UserName,
+            CreateDate: data[i].CreateDate,
+            customerIds: details.customerIds,
         })
     }
     return (
@@ -90,7 +101,7 @@ const LogType2 = ({ data }) => {
                                 <th className='text-center'>Thời gian thực hiện</th>
                                 <th className='text-center'>ID khách hàng</th>
                             </tr>
-                            
+
                         </thead>
                         <tbody>
                             {processData.map((e, index) =>
@@ -108,14 +119,15 @@ const LogType2 = ({ data }) => {
         </div>
     )
 }
+
 const LogType3 = ({ data }) => {
     var processData = [];
-    for(var i = 0; i <  data.length; i ++){
+    for (var i = 0; i < data.length; i++) {
         const details = JSON.parse(data[i].JSON);
         processData.push({
-            UserName : data[i].AccountModel.UserName,
-            CreateDate : data[i].CreateDate,
-            TaxCode : details.TaxCode,
+            UserName: data[i].AccountModel.UserName,
+            CreateDate: data[i].CreateDate,
+            TaxCode: details.TaxCode,
         })
     }
     return (
@@ -130,7 +142,7 @@ const LogType3 = ({ data }) => {
                                 <th className='text-center'>Thời gian thực hiện</th>
                                 <th className='text-center'>MST</th>
                             </tr>
-                            
+
                         </thead>
                         <tbody>
                             {processData.map((e, index) =>
@@ -148,4 +160,5 @@ const LogType3 = ({ data }) => {
         </div>
     )
 }
+
 export default DisplayLog
