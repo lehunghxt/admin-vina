@@ -78,7 +78,7 @@ const Log = () => {
         </>
     )
 }
-export const getServerSideProps = function () {
+export const getServerSideProps = async function ({ req, res }) {
     if (!req.session.User.Permissions.includes('access_log')) {
         return {
             redirect: {
