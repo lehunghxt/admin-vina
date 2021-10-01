@@ -14,7 +14,11 @@ const CustomerModelEHD = _CustomerModel(sequelizeEHD);
 const InvoiceModelEHD = _InvoiceModel(sequelizeEHD);
 const { DOMParser } = require('xmldom')
 
-export const PrepareTaxCode = async (ProvinceId, FromDate, ToDate) => {
+export const PrepareTaxCode = async (Taxcode, ProvinceId, FromDate, ToDate) => {
+  const where = {
+    ProvinceId
+  }
+  if (Taxcode) where.Taxcode = Taxcode;
   CustomerModel.hasMany(InvoiceModel, { foreignKey: 'CustomerId' })
   InvoiceModel.belongsTo(CustomerModel, { foreignKey: 'CustomerId' })
   var data = await CustomerModel.findAll({
@@ -55,9 +59,7 @@ export const PrepareTaxCode = async (ProvinceId, FromDate, ToDate) => {
       },
     }],
     raw: true,
-    where: {
-      ProvinceId
-    }
+    where: where
   })
 
   CustomerModelEHD.hasMany(InvoiceModelEHD, { foreignKey: 'CustomerId' })
@@ -100,9 +102,7 @@ export const PrepareTaxCode = async (ProvinceId, FromDate, ToDate) => {
       },
     }],
     raw: true,
-    where: {
-      ProvinceId
-    }
+    where: where
   })
   var result = [...data, ...dataEHD];
   var hdTaxcodes = data.map(e => e.Taxcode);
@@ -119,7 +119,7 @@ export const ExportHaNoiData = async (Customers, FromDate, ToDate, Type, Current
     for (let i = 0; i < datas.length; i++) {
       var data = datas[i];
       data.invoices = MapToTaxHaNoiData(data.invoices);
-      data.details =  MapToTaxHaNoiDetail(data.invoices, data.details);
+      data.details = MapToTaxHaNoiDetail(data.invoices, data.details);
       await ExportExcel(data.customer.Taxcode, data.invoices, data.details, Type);
     }
   } catch (error) {
@@ -169,45 +169,45 @@ const MapToTaxHaNoiData = (invoices) => {
 }
 
 const MapToTaxHaNoiDetail = (invoices, details) => {
-    var result = [];
-    for (let i = 0; i < invoices.length; i++) {
-        let invoice = invoices[i];
-        let invoiceDetails = details.filter(e => e.IvoiceId == invoice.Id);
-        for (let y = 0; y < invoiceDetails.length; y++) {
-        invoiceDetails[y].Tax = (invoiceDetails[y].Tax == 0 && invoice.Tax != 0) ? invoice.Tax : invoiceDetails[y].Tax;
-        invoiceDetails[y].TemptCode = invoice.TemptCode;
-        invoiceDetails[y].Symbol = invoice.Symbol;
-        invoiceDetails[y].InvoiceNumber = invoice.InvoiceNumber;
+  var result = [];
+  for (let i = 0; i < invoices.length; i++) {
+    let invoice = invoices[i];
+    let invoiceDetails = details.filter(e => e.IvoiceId == invoice.Id);
+    for (let y = 0; y < invoiceDetails.length; y++) {
+      invoiceDetails[y].Tax = (invoiceDetails[y].Tax == 0 && invoice.Tax != 0) ? invoice.Tax : invoiceDetails[y].Tax;
+      invoiceDetails[y].TemptCode = invoice.TemptCode;
+      invoiceDetails[y].Symbol = invoice.Symbol;
+      invoiceDetails[y].InvoiceNumber = invoice.InvoiceNumber;
 
-        invoiceDetails[y].Tax = invoiceDetails[y].Tax == -1 ? 0 : invoiceDetails[y].Tax;
-        invoiceDetails[y].MoneyTax = invoiceDetails[y].MoneyTax ? invoiceDetails[y].MoneyTax : (invoiceDetails[y].TotalMoney * invoiceDetails[y].Tax / 100);
-        if (invoiceDetails[y].Discount && y > 0 && invoiceDetails[y].IvoiceId == invoiceDetails[y - 1].IvoiceId) {
-            invoiceDetails[y].DiscountMoney = invoiceDetails[y].TotalMoney;
-            invoiceDetails[y].TotalMoneyAfterTax = 0;
-            invoiceDetails[y].Tax = 0;
-            invoiceDetails[y].MoneyTax = 0;
-            invoiceDetails[y].TotalMoney = 0;
+      invoiceDetails[y].Tax = invoiceDetails[y].Tax == -1 ? 0 : invoiceDetails[y].Tax;
+      invoiceDetails[y].MoneyTax = invoiceDetails[y].MoneyTax ? invoiceDetails[y].MoneyTax : (invoiceDetails[y].TotalMoney * invoiceDetails[y].Tax / 100);
+      if (invoiceDetails[y].Discount && y > 0 && invoiceDetails[y].IvoiceId == invoiceDetails[y - 1].IvoiceId) {
+        invoiceDetails[y].DiscountMoney = invoiceDetails[y].TotalMoney;
+        invoiceDetails[y].TotalMoneyAfterTax = 0;
+        invoiceDetails[y].Tax = 0;
+        invoiceDetails[y].MoneyTax = 0;
+        invoiceDetails[y].TotalMoney = 0;
 
-            invoiceDetails[y - 1].TotalMoney = invoiceDetails[y - 1].TotalMoney - invoiceDetails[y].DiscountMoney;
-            invoiceDetails[y - 1].MoneyTax = invoiceDetails[y - 1].TotalMoney * invoiceDetails[y - 1].Tax / 100;
-            invoiceDetails[y - 1].TotalMoney = invoiceDetails[y - 1].TotalMoney + invoiceDetails[y - 1].MoneyTax;
-        }
-        else if (invoiceDetails[y].Discount && y > 0 && invoiceDetails[y].IvoiceId == invoiceDetails[y + 1].IvoiceId) {
-            invoiceDetails[y].DiscountMoney = invoiceDetails[y].TotalMoney;
-            invoiceDetails[y].TotalMoneyAfterTax = 0;
-            invoiceDetails[y].Tax = 0;
-            invoiceDetails[y].MoneyTax = 0;
-            invoiceDetails[y].TotalMoney = 0;
+        invoiceDetails[y - 1].TotalMoney = invoiceDetails[y - 1].TotalMoney - invoiceDetails[y].DiscountMoney;
+        invoiceDetails[y - 1].MoneyTax = invoiceDetails[y - 1].TotalMoney * invoiceDetails[y - 1].Tax / 100;
+        invoiceDetails[y - 1].TotalMoney = invoiceDetails[y - 1].TotalMoney + invoiceDetails[y - 1].MoneyTax;
+      }
+      else if (invoiceDetails[y].Discount && y > 0 && invoiceDetails[y].IvoiceId == invoiceDetails[y + 1].IvoiceId) {
+        invoiceDetails[y].DiscountMoney = invoiceDetails[y].TotalMoney;
+        invoiceDetails[y].TotalMoneyAfterTax = 0;
+        invoiceDetails[y].Tax = 0;
+        invoiceDetails[y].MoneyTax = 0;
+        invoiceDetails[y].TotalMoney = 0;
 
-            invoiceDetails[y + 1].TotalMoney = invoiceDetails[y + 1].TotalMoney - invoiceDetails[y].DiscountMoney;
-            invoiceDetails[y + 1].MoneyTax = invoiceDetails[y + 1].TotalMoney * invoiceDetails[y + 1].Tax / 100;
-            invoiceDetails[y + 1].TotalMoney = invoiceDetails[y + 1].TotalMoney + invoiceDetails[y + 1].MoneyTax;
-        }
-        }
-        //result = [...result, ...invoiceDetails];
-        result.push(...invoiceDetails);
+        invoiceDetails[y + 1].TotalMoney = invoiceDetails[y + 1].TotalMoney - invoiceDetails[y].DiscountMoney;
+        invoiceDetails[y + 1].MoneyTax = invoiceDetails[y + 1].TotalMoney * invoiceDetails[y + 1].Tax / 100;
+        invoiceDetails[y + 1].TotalMoney = invoiceDetails[y + 1].TotalMoney + invoiceDetails[y + 1].MoneyTax;
+      }
     }
-    return result;
+    //result = [...result, ...invoiceDetails];
+    result.push(...invoiceDetails);
+  }
+  return result;
 }
 
 const ExportExcel = async (taxcode, invoices, details, type) => {
@@ -531,19 +531,19 @@ const GetTaxReportData = async (Customers, FromDate, ToDate, ReportType, Current
           const ListNotSigned = InvoicesByNotice.filter(e => e.InvoiceNumber < lastSignedInvoiceInList.InvoiceNumber && e.Status === 1);
           if (ListNotSigned && ListNotSigned.length > 0) {
             var ListNeedUpdate = [];
-            for(var inv = 0; inv < ListNotSigned.length; inv++){
-                var thisInv = ListNotSigned[inv];
-                var invoice = await invoices.find(i => i.Id == thisInv.Id);
-                if (!invoice.IvoiceCode){
-                    invoice.IvoiceCode = await GetInvoiceCode();
-                }
-                invoice.Status = 5;
-                invoice.DateofSign = invoice.DateofInvoice;
+            for (var inv = 0; inv < ListNotSigned.length; inv++) {
+              var thisInv = ListNotSigned[inv];
+              var invoice = await invoices.find(i => i.Id == thisInv.Id);
+              if (!invoice.IvoiceCode) {
+                invoice.IvoiceCode = await GetInvoiceCode();
+              }
+              invoice.Status = 5;
+              invoice.DateofSign = invoice.DateofInvoice;
 
-                ListNeedUpdate.push(invoice);
-                //Update result
-                InvoicesByNotice[InvoicesByNotice.findIndex( e => e.Id == invoice.Id)] = invoice;
-                invoices[invoices.findIndex(e => e.Id == invoice.Id)] = invoice;
+              ListNeedUpdate.push(invoice);
+              //Update result
+              InvoicesByNotice[InvoicesByNotice.findIndex(e => e.Id == invoice.Id)] = invoice;
+              invoices[invoices.findIndex(e => e.Id == invoice.Id)] = invoice;
             }
             await LogActionCancleInvoice(ListNeedUpdate, CurrentUser, customer)
             //await VoidNotSignedInvoices(ListNeedUpdate, customer.Id);

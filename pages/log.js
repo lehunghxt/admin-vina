@@ -13,6 +13,7 @@ const Log = () => {
     }
     const handleInputChange = e => {
         setQuery({ ...query, [e.currentTarget.name]: e.currentTarget.value })
+        setData(null)
     }
     return (
         <>
@@ -72,14 +73,22 @@ const Log = () => {
                     </div>
                 </form>
             </div>
-   
+
             <DisplayLog data={data} type={query.type} />
         </>
     )
 }
 export const getServerSideProps = function () {
+    if (!req.session.User.Permissions.includes('access_log')) {
+        return {
+            redirect: {
+                permanent: false,
+                destination: "/403",
+            }
+        }
+    }
     return {
-      props: {},
+        props: {},
     };
-  };
+};
 export default Log
