@@ -2,7 +2,7 @@ import Head from "next/head";
 import { Get, Post } from '@Helper/ApiHelper'
 import { useCallback, useState } from 'react'
 import { useUser } from 'Provider/UserProvider'
-
+import Swal from "sweetalert2";
 import { useLoading } from '@Provider/LoadingProvider';
 
 function Hanoi() {
@@ -13,6 +13,7 @@ function Hanoi() {
     const [taxcodes, setTaxcodes] = useState([])
     const [searchtaxcodes, setSearchtaxcodes] = useState([])
     const [taxcode, setTaxcode] = useState('')
+    const [showTaxCode, setShowTaxCode] = useState(false)
 
     const Periods = [
         { key: 0, text: "Chọn kỳ kế toán" },
@@ -89,20 +90,45 @@ function Hanoi() {
             e.preventDefault();
             show();
             if (!query.fromdate || !query.todate) {
-                alert("Ngày không hợp lệ");
+                Swal.fire({
+                    title: "Thông báo",
+                    icon: "warning",
+                    html: `Ngày không hợp lệ`,
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "Ok",
+                });
                 hide();
                 return false;
             }
             query.type = type;
             var data = await Get('taxreport', { params: query });
             if (data.error) {
-                alert(data.error);
+                Swal.fire({
+                    title: "Thông báo",
+                    icon: "error",
+                    html: `Đã có lỗi xảy ra, vui lòng thử lại.`,
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "Ok",
+                });
+                console.log(data.error);
                 hide();
                 return false;
             }
-            setTaxcodes(data || []);
-            setSearchtaxcodes(data || []);
             hide();
+            if(data.length > 0){
+                setTaxcodes(data || []);
+                setSearchtaxcodes(data || []);
+                setShowTaxCode(true);
+            }else{
+                setShowTaxCode(false);
+                Swal.fire({
+                    title: "Thông báo",
+                    icon: "warning",
+                    html: `Không tìm thấy dữ liệu`,
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "Ok",
+                });
+            }
         }
         catch (e) {
             console.log(e);
@@ -115,7 +141,13 @@ function Hanoi() {
             e.preventDefault();
             if (!query.fromdate || !query.todate) {
                 hide();
-                alert("Ngày không hợp lệ");
+                Swal.fire({
+                    title: "Thông báo",
+                    icon: "warning",
+                    html: `Ngày không hợp lệ`,
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "Ok",
+                });
                 return false;
             }
             query.type = type;
@@ -123,7 +155,14 @@ function Hanoi() {
             var data = await Post('taxreport', { params: query, responseType: 'blob' });
             if (data.error) {
                 hide();
-                alert(data.error);
+                Swal.fire({
+                    title: "Thông báo",
+                    icon: "error",
+                    html: `Đã có lỗi xãy ra, xin vui lòng thử lại.`,
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "Ok",
+                });
+                console.log(data.error);
                 return false;
             }
             const url = data.file;
@@ -157,7 +196,7 @@ function Hanoi() {
                                 type="text"
                                 name="taxcode"
                                 id="taxcode"
-                                className="form-control"
+                                className="form-control form-control-sm"
                                 value={query.taxcode}
                                 onChange={handleInputChange}
                             />
@@ -170,7 +209,7 @@ function Hanoi() {
                                 type="date"
                                 name="fromdate"
                                 id="fromdate"
-                                className="form-control"
+                                className="form-control form-control-sm"
                                 value={query.fromdate}
                                 onChange={handleInputChange}
                             />
@@ -183,7 +222,7 @@ function Hanoi() {
                                 type="date"
                                 name="todate"
                                 id="todate"
-                                className="form-control"
+                                className="form-control form-control-sm"
                                 value={query.todate}
                                 onChange={handleInputChange}
                             />
@@ -192,7 +231,7 @@ function Hanoi() {
                             <label>
                                 <b>Kỳ kế toán</b>
                             </label>
-                            <select className="form-control" onChange={e => handlePeriodChange(e)}>
+                            <select className="form-control form-control-sm" onChange={e => handlePeriodChange(e)}>
                                 {Periods.map(e => {
                                     return <option key={e.key} value={e.key}>{e.text}</option>
                                 })}
@@ -204,25 +243,28 @@ function Hanoi() {
                     </div>
                 </form>
             </div>
-            <hr />
-            <div className="card shadow">
-                <div className="card-header d-flex justify-content-end">
-                    <label><input type="search" onChange={handleSearch} value={taxcode} className="form-controll" />&nbsp;Tìm <i className="fa fa-search"></i></label>
-                </div>
-                <form className="w-100" onSubmit={e => handleFormSubmit(e, 2)}>
-                    <div className="card-body">
-                        <div className="list-taxcodes">
-                            <ListTaxcodes
-                                taxcodes={searchtaxcodes && searchtaxcodes.length > 0 ? searchtaxcodes : []}
-                                callback={handleSelectChange}
-                            />
+            {
+                showTaxCode ? 
+                    <div className="card shadow mt-3">
+                        <div className="card-header d-flex justify-content-end">
+                            <label><input type="search" onChange={handleSearch} value={taxcode} className="form-control form-control-sml" />&nbsp;Tìm <i className="fa fa-search"></i></label>
                         </div>
+                        <form className="w-100" onSubmit={e => handleFormSubmit(e, 2)}>
+                            <div className="card-body">
+                                <div className="list-taxcodes">
+                                    <ListTaxcodes
+                                        taxcodes={searchtaxcodes && searchtaxcodes.length > 0 ? searchtaxcodes : []}
+                                        callback={handleSelectChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="card-footer">
+                                <button className="btn btn-primary">Xuất báo cáo</button>
+                            </div>
+                        </form>
                     </div>
-                    <div className="card-footer">
-                        <button className="btn btn-primary">Xuất báo cáo</button>
-                    </div>
-                </form>
-            </div>
+                : <></>
+            }
         </>
     )
 }
@@ -238,7 +280,7 @@ const ListTaxcodes = ({ taxcodes, callback }) => {
                             <label htmlFor={`check_${t.Id}`}>{t.Taxcode}</label>
                         </span>
                     </>
-                ) : <div className="text-center">Không tìm thấy dữ liệu</div>
+                ) : <></>
             }
         </>
     )
