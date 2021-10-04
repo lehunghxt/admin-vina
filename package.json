@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "hung": "next build && nodemon server.js"
+    "gen": "next build && nodemon server.js"
   },
   "dependencies": {
     "archiver": "^5.3.0",
