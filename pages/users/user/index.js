@@ -9,7 +9,7 @@ import Swal from "sweetalert2";
 const User = ({ Permissions }) => {
     const router = useRouter()
     const { CurrentUser } = useUser();
-    const [user, setUser] = useState({ Permissions: Permissions.map(e => e.Code) })
+    const [user, setUser] = useState({ Permissions: [] })
     const [collapse, setCollapse] = useState(false)
     const [hidePass, setHidePass] = useState(true)
     const [hideConfirmPass, setHideConfirmPass] = useState(true)

@@ -181,7 +181,7 @@ function Phutho() {
                 <title>Báo cáo Phú thọ</title>
                 <link rel="icon" href="/logo.ico" />
             </Head>
-            <h1>Báo cáo Phú Thọ</h1>
+            <h3>Báo cáo Phú Thọ</h3>
             <div className="card shadow">
                 <form onSubmit={e => handleSubmit(e, 1)}>
                     <div className="card-body d-flex">
