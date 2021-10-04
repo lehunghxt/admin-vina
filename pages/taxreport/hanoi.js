@@ -239,7 +239,7 @@ function Hanoi() {
                         </div>
                     </div>
                     <div className="card-footer">
-                        <button className="btn btn-primary">Tìm kiếm</button>
+                        <button className="btn btn-primary btn-sm">Tìm kiếm</button>
                     </div>
                 </form>
             </div>
@@ -259,7 +259,7 @@ function Hanoi() {
                                 </div>
                             </div>
                             <div className="card-footer">
-                                <button className="btn btn-primary">Xuất báo cáo</button>
+                                <button className="btn btn-primary btn-sm">Xuất báo cáo</button>
                             </div>
                         </form>
                     </div>

@@ -2,17 +2,18 @@ import Head from "next/head";
 import { Get, Post } from '@Helper/ApiHelper'
 import { useCallback, useState } from 'react'
 import { useUser } from 'Provider/UserProvider'
-
+import Swal from "sweetalert2";
 import { useLoading } from '../../Provider/LoadingProvider';
 
 function Phutho() {
     const { show, hide } = useLoading();
 
     const { CurrentUser } = useUser();
-    const [query, setQuery] = useState({ provinceid: '26', action: "Phutho" })
-    const [taxcodes, setTaxcodes] = useState([])
-    const [searchtaxcodes, setSearchtaxcodes] = useState([])
-    const [taxcode, setTaxcode] = useState('')
+    const [query, setQuery] = useState({ provinceid: '26', action: "Phutho" });
+    const [taxcodes, setTaxcodes] = useState([]);
+    const [searchtaxcodes, setSearchtaxcodes] = useState([]);
+    const [taxcode, setTaxcode] = useState('');
+    const [showTaxCode, setShowTaxCode] = useState(false);
 
     const Periods = [
         { key: 0, text: "Chọn kỳ kế toán" },
@@ -89,18 +90,43 @@ function Phutho() {
             e.preventDefault();
             show();
             if (!query.fromdate || !query.todate) {
-                alert("Ngày không hợp lệ");
+                Swal.fire({
+                    title: "Thông báo",
+                    icon: "warning",
+                    html: `Ngày không hợp lệ`,
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "Ok",
+                });
                 return false;
             }
             query.type = type;
             var data = await Get('taxreport', { params: query });
             if (data.error) {
-                alert(data.error);
+                Swal.fire({
+                    title: "Thông báo",
+                    icon: "error",
+                    html: `Đã có lỗi xãy ra, vui lòng thử lại.`,
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "Ok",
+                });
+                console.log(data.error);
                 return false;
             }
-            setTaxcodes(data || []);
-            setSearchtaxcodes(data || []);
             hide();
+            if(data.length > 0){
+                setShowTaxCode(true)
+                setTaxcodes(data || []);
+                setSearchtaxcodes(data || []);
+            }else{
+                Swal.fire({
+                    title: "Thông báo",
+                    icon: "warning",
+                    html: `Không tìm thấy dữ liệu.`,
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "Ok",
+                });
+                setShowTaxCode(false)
+            }
         }
         catch (e) {
             console.log(e);
@@ -112,14 +138,27 @@ function Phutho() {
             show();
             e.preventDefault();
             if (!query.fromdate || !query.todate) {
-                alert("Ngày không hợp lệ");
+                Swal.fire({
+                    title: "Thông báo",
+                    icon: "warning",
+                    html: `Ngày không hợp lệ`,
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "Ok",
+                });
                 return false;
             }
             query.type = type;
             query.customers = searchtaxcodes;
             var data = await Post('taxreport', { params: query });
             if (data.error) {
-                alert(data.error);
+                Swal.fire({
+                    title: "Thông báo",
+                    icon: "error",
+                    html: `Đã có lỗi xãy ra, vui lòng thử lại.`,
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "Ok",
+                });
+                console.log(data.error);
                 return false;
             }
             const url = data.file;
@@ -142,7 +181,7 @@ function Phutho() {
                 <title>Báo cáo Phú thọ</title>
                 <link rel="icon" href="/logo.ico" />
             </Head>
-            <div className="card">
+            <div className="card shadow">
                 <form onSubmit={e => handleSubmit(e, 1)}>
                     <div className="card-body d-flex">
                         <div className="col-md-3">
@@ -153,7 +192,7 @@ function Phutho() {
                                 type="text"
                                 name="taxcode"
                                 id="taxcode"
-                                className="form-control"
+                                className="form-control form-control-sm"
                                 value={query.taxcode}
                                 onChange={handleInputChange}
                             />
@@ -166,7 +205,7 @@ function Phutho() {
                                 type="date"
                                 name="fromdate"
                                 id="fromdate"
-                                className="form-control"
+                                className="form-control form-control-sm"
                                 value={query.fromdate}
                                 onChange={handleInputChange}
                             />
@@ -179,7 +218,7 @@ function Phutho() {
                                 type="date"
                                 name="todate"
                                 id="todate"
-                                className="form-control"
+                                className="form-control form-control-sm"
                                 value={query.todate}
                                 onChange={handleInputChange}
                             />
@@ -188,7 +227,7 @@ function Phutho() {
                             <label>
                                 <b>Kỳ kế toán</b>
                             </label>
-                            <select className="form-control" onChange={e => handlePeriodChange(e)}>
+                            <select className="form-control form-control-sm" onChange={e => handlePeriodChange(e)}>
                                 {Periods.map(e => {
                                     return <option key={e.key} value={e.key}>{e.text}</option>
                                 })}
@@ -196,29 +235,33 @@ function Phutho() {
                         </div>
                     </div>
                     <div className="card-footer">
-                        <button className="btn btn-primary">Tìm kiếm</button>
+                        <button className="btn btn-primary btn-sm">Tìm kiếm</button>
                     </div>
                 </form>
             </div>
-            <hr />
-            <div className="card">
-                <div className="card-header d-flex justify-content-end">
-                    <label><input type="search" onChange={handleSearch} value={taxcode} className="form-controll" />&nbsp;Tìm <i className="fa fa-search"></i></label>
-                </div>
-                <form className="w-100" onSubmit={e => handleFormSubmit(e, 2)}>
-                    <div className="card-body">
-                        <div className="list-taxcodes">
-                            <ListTaxcodes
-                                taxcodes={searchtaxcodes && searchtaxcodes.length > 0 ? searchtaxcodes : []}
-                                callback={handleSelectChange}
-                            />
+            {
+                showTaxCode ?
+                    <div className="card shadow">
+                        <div className="card-header d-flex justify-content-end">
+                            <label><input type="search" onChange={handleSearch} value={taxcode} className="form-control form-control-sml" />&nbsp;Tìm <i className="fa fa-search"></i></label>
                         </div>
+                        <form className="w-100" onSubmit={e => handleFormSubmit(e, 2)}>
+                            <div className="card-body">
+                                <div className="list-taxcodes">
+                                    <ListTaxcodes
+                                        taxcodes={searchtaxcodes && searchtaxcodes.length > 0 ? searchtaxcodes : []}
+                                        callback={handleSelectChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="card-footer">
+                                <button className="btn btn-primary btn-sm">Xuất báo cáo</button>
+                            </div>
+                        </form>
                     </div>
-                    <div className="card-footer">
-                        <button className="btn btn-primary">Xuất báo cáo</button>
-                    </div>
-                </form>
-            </div>
+                : <></>
+            }
+            
         </>
     )
 }
@@ -235,7 +278,7 @@ const ListTaxcodes = ({ taxcodes, callback }) => {
                         </span>
                     </>
                 })
-                    : <div className="text-center">Không tìm thấy dữ liệu</div>
+                    : <></>
             }
         </>
     )
