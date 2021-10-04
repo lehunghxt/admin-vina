@@ -181,6 +181,7 @@ function Phutho() {
                 <title>Báo cáo Phú thọ</title>
                 <link rel="icon" href="/logo.ico" />
             </Head>
+            <h1>Báo cáo Phú Thọ</h1>
             <div className="card shadow">
                 <form onSubmit={e => handleSubmit(e, 1)}>
                     <div className="card-body d-flex">
@@ -243,7 +244,9 @@ function Phutho() {
                 showTaxCode ?
                     <div className="card shadow">
                         <div className="card-header d-flex justify-content-end">
-                            <label><input type="search" onChange={handleSearch} value={taxcode} className="form-control form-control-sml" />&nbsp;Tìm <i className="fa fa-search"></i></label>
+                            <label>
+                                <input type="search" onChange={handleSearch} value={taxcode} className="form-control form-control-sml" placeholder='Tìm'/>
+                            </label>
                         </div>
                         <form className="w-100" onSubmit={e => handleFormSubmit(e, 2)}>
                             <div className="card-body">

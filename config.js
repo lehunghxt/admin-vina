@@ -5,6 +5,7 @@ class _SystemConfig {
         this.HD_SQL_CONFIG = {
             encrypt: false,
             username: "sa",
+            // password: "VinaCA@123!@#",
             password: "SqlAsap@123",
             database: "EISV2",
             host: "10.0.0.51",
@@ -12,6 +13,7 @@ class _SystemConfig {
         this.EHD_SQL_CONFIG = {
             encrypt: false,
             username: "sa",
+            // password: "VinaCA@123!@#",
             password: "SqlAsap@123",
             database: "Einvoince",
             host: "10.0.0.51",
@@ -19,7 +21,7 @@ class _SystemConfig {
         this.SVA_SQL_CONFIG = {
             encrypt: false,
             username: "sa",
-            //password: "VinaCA@123!@#",
+            // password: "VinaCA@123!@#",
             password: "SqlAsap@123",
             database: "SVA",
             host: "10.0.0.51",
