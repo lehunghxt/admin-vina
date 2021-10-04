@@ -5,29 +5,29 @@ class _SystemConfig {
         this.HD_SQL_CONFIG = {
             encrypt: false,
             username: "sa",
-            password: "VinaCA@123!@#",
-            // password: "SqlAsap@123",
             database: "EISV2",
-            //host: "10.0.0.51",
             host: "192.168.10.2",
+            password: "VinaCA@123!@#",
+            //host: "10.0.0.51",
+            // password: "SqlAsap@123",
         }
         this.EHD_SQL_CONFIG = {
             encrypt: false,
             username: "sa",
-            password: "VinaCA@123!@#",
-            // password: "SqlAsap@123",
             database: "Einvoince",
-            //host: "10.0.0.51",
             host: "192.168.10.2",
+            password: "VinaCA@123!@#",
+            //host: "10.0.0.51",
+            // password: "SqlAsap@123",
         }
         this.SVA_SQL_CONFIG = {
             encrypt: false,
             username: "sa",
-            password: "VinaCA@123!@#",
-            password: "SqlAsap@123",
             database: "SVA",
-            //host: "10.0.0.51",
             host: "192.168.10.2",
+            password: "VinaCA@123!@#",
+            //host: "10.0.0.51",
+            //password: "SqlAsap@123",
         }
     }
     get Session_Secret() { return this.SESSION_SECRET; }
