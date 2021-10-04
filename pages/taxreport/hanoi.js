@@ -9,7 +9,7 @@ function Hanoi() {
     const { show, hide } = useLoading();
 
     const { CurrentUser } = useUser();
-    const [query, setQuery] = useState({ provinceid: '03', action: "Hanoi" })
+    const [query, setQuery] = useState({ provinceid: '01', action: "Hanoi" })
     const [taxcodes, setTaxcodes] = useState([])
     const [searchtaxcodes, setSearchtaxcodes] = useState([])
     const [taxcode, setTaxcode] = useState('')
